@@ -34,7 +34,7 @@ createRoot(document.getElementById('root')!).render(
       initOptions={keycloakInitOptions}
       onEvent={onKeycloakEvent}
       onTokens={onKeycloakTokens}
-      LoadingComponent={<div>Authenticating with Keycloak... Please wait.</div>} 
+      LoadingComponent={<div style={{display: 'flex', justifyContent: 'center'}}>Authenticating with Keycloak... Please wait.</div>} 
     >
       <ThemeProvider>
         <BrowserRouter>

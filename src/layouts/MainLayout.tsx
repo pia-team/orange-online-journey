@@ -40,12 +40,12 @@ const MainLayout: React.FC = () => {
             marginLeft: { sm: `${effectiveSidebarWidth}px` },
             display: 'flex',
             flexDirection: 'column',
-            marginTop: theme.mixins.toolbar.minHeight ? `${theme.mixins.toolbar.minHeight}px` : '64px', // Account for AppBar height
-            height: `calc(100vh - ${theme.mixins.toolbar.minHeight ? `${theme.mixins.toolbar.minHeight}px` : '64px'})`, // Fill remaining viewport height
+            marginTop: theme.mixins.toolbar.minHeight ? `${theme.mixins.toolbar.minHeight}px` : '64px', 
+            height: `calc(100vh - ${theme.mixins.toolbar.minHeight ? `${theme.mixins.toolbar.minHeight}px` : '64px'})`,
             backgroundColor: theme.palette.background.default,
-            paddingLeft: 0, // Ensure no extra padding that might shrink SectionHeader
-            paddingRight: 0, // Ensure no extra padding that might shrink SectionHeader
-            overflow: 'hidden', // Prevent this box from showing scrollbars, inner content will scroll
+            paddingLeft: 0,
+            paddingRight: 0, 
+            overflow: 'hidden', 
           })}
         >
           <Outlet />

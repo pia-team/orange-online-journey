@@ -1,6 +1,8 @@
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { ReactKeycloakProvider } from '@react-keycloak/web';
+import { Provider } from 'react-redux';
+import { store } from './store'; // Assuming store.ts is in src
 import keycloak from './keycloak'; // Your Keycloak instance
 import './index.css';
 import App from './App.tsx';
@@ -36,7 +38,9 @@ createRoot(document.getElementById('root')!).render(
     >
       <ThemeProvider>
         <BrowserRouter>
-          <App />
+          <Provider store={store}>
+            <App />
+          </Provider>
         </BrowserRouter>
       </ThemeProvider>
     </ReactKeycloakProvider>

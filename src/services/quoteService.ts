@@ -1,43 +1,34 @@
 import type { Quote, QuoteQueryParams, QuoteResponse } from './types';
-
-const BASE_URL = 'https://quote-api.dnextdev-orange.com/api';
+import { get } from './httpClient';
 
 /**
  * Fetch quotes from the API with filtering and pagination
  */
 export const fetchQuotes = async (params: QuoteQueryParams): Promise<QuoteResponse> => {
   try {
-    // Build query parameters
-    const queryParams = new URLSearchParams();
-    
-    // Add required parameters
-    queryParams.append('state!=', 'cancelled');
-    queryParams.append('limit', params.limit.toString());
-    queryParams.append('offset', params.offset.toString());
-    queryParams.append('depth', (params.depth || 2).toString());
-    queryParams.append('expand', params.expand || 'relatedParty.account');
-    queryParams.append('sort', params.sort || '-createdDate');
-    queryParams.append('relatedParty.id', params.customerId);
+    // Prepare Axios params object
+    const axiosParams: Record<string, string | number> = {
+      'state!=': 'cancelled',
+      limit: params.limit,
+      offset: params.offset,
+      depth: params.depth || 2,
+      expand: params.expand || 'relatedParty.account',
+      sort: params.sort || '-createdDate',
+      'relatedParty.id': params.customerId
+    };
     
     // Add channel filter if provided
     if (params.channel) {
-      queryParams.append('channel.name', params.channel);
+      axiosParams['channel.name'] = params.channel;
     }
     
-    const response = await fetch(`${BASE_URL}/quoteManagement/v4/quote?${queryParams.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any required authorization headers here
-      },
+    // Make the API call using our httpClient
+    const response = await get<QuoteResponse>('/quoteManagement/v4/quote', {
+      params: axiosParams
     });
 
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-
-    const data: QuoteResponse = await response.json();
-    return data;
+    // Axios response has data property that contains the response body
+    return response.data;
   } catch (error) {
     console.error('Error fetching quotes:', error);
     throw error;

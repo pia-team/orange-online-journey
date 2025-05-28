@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { get } from '../../services/httpClient';
-import type { Quote, QuoteResponse, QuoteQueryParams } from '../../services/types';
+import type { Quote, QuoteQueryParams } from '../../services/types';
 import { sortQuotes } from '../../services/quoteService';
 import keycloak from '../../keycloak';
 
@@ -42,23 +42,29 @@ export const fetchQuotesAsync = createAsyncThunk(
       // Get customer ID from token
       const customerId = getCustomerId();
       
-      // Prepare query parameters
-      const queryParams = new URLSearchParams();
-      queryParams.append('state!=', 'cancelled');
-      queryParams.append('limit', params.limit.toString());
-      queryParams.append('offset', params.offset.toString());
-      queryParams.append('depth', (params.depth || 2).toString());
-      queryParams.append('expand', params.expand || 'relatedParty.account');
-      queryParams.append('sort', params.sort || '-createdDate');
-      queryParams.append('relatedParty.id', customerId);
-      queryParams.append('channel.name', 'Online');
+      // Prepare Axios params object - Type-safe approach
+      const axiosParams: Record<string, string | number> = {
+        'state!=': 'cancelled',
+        limit: params.limit,
+        offset: params.offset,
+        depth: params.depth || 2,
+        expand: params.expand || 'relatedParty.account',
+        sort: params.sort || '-createdDate',
+        'relatedParty.id': customerId,
+        'channel.name': 'Online'
+      };
       
-      // Make the API request
-      const response = await get<QuoteResponse>(`/quoteManagement/v4/quote?${queryParams.toString()}`);
+      // Make the API request using axios with params
+      const response = await get<Quote[]>('/quoteManagement/v4/quote', {
+        params: axiosParams
+      });
+      
+      // Get the total count from response headers
+      const count = parseInt(response.headers?.['x-total-count'] || '0', 10);
       
       return {
         data: response.data,
-        count: response.headers['x-total-count'],
+        count: count || response.data.length // Fallback to data length if header not available
       };
     } catch (error) {
       if (error instanceof Error) {

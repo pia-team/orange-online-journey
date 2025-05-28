@@ -16,8 +16,8 @@ const CreateQuoteButton: React.FC<CreateQuoteButtonProps> = ({ onClick }) => {
         onClick={onClick}
         sx={{ 
           position: 'absolute',
-          top: 50,
-          right: 16,
+          top: 40,
+          right: 40,
           bgcolor: orange[500],
         }}
       >

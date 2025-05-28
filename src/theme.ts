@@ -29,7 +29,14 @@ const theme = createTheme({
           backgroundColor: orange[700], 
         }
       }
-    }
+    },
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          maxWidth: '100% !important',
+        },
+      },
+    },
   }
 });
 

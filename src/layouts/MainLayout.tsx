@@ -63,7 +63,7 @@ const MainLayout: React.FC = () => {
               maxWidth: 'none'  // Override default max width
             }}
           >
-            <Outlet />
+              <Outlet />
           </Container>
         </Box>
       </Box>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, CssBaseline } from '@mui/material';
+import { Box, CssBaseline, Container } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { Outlet } from 'react-router-dom';
 import theme from '../theme';
@@ -22,9 +22,14 @@ const MainLayout: React.FC = () => {
 
   return (
     <MuiThemeProvider theme={theme}>
-      <Box sx={{ display: 'flex' }}>
+      {/* Root container */}
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         <CssBaseline />
+        
+        {/* Header - App Bar */}
         <AppBarComponent drawerWidth={effectiveSidebarWidth} />
+        
+        {/* Sidebar */}
         <Sidebar
           drawerWidth={EXPANDED_DRAWER_WIDTH}
           mobileOpen={mobileOpen}
@@ -32,23 +37,34 @@ const MainLayout: React.FC = () => {
           onWidthChange={handleSidebarWidthChange}
         />
 
+        {/* Main Content Area */}
         <Box
           component='main'
-          sx={(theme) => ({
+          sx={{
             flexGrow: 1,
-            width: { sm: `calc(100% - ${effectiveSidebarWidth}px)` },
-            marginLeft: { sm: `${effectiveSidebarWidth}px` },
-            display: 'flex',
-            flexDirection: 'column',
-            marginTop: theme.mixins.toolbar.minHeight ? `${theme.mixins.toolbar.minHeight}px` : '64px', 
-            height: `calc(100vh - ${theme.mixins.toolbar.minHeight ? `${theme.mixins.toolbar.minHeight}px` : '64px'})`,
-            backgroundColor: theme.palette.background.default,
-            paddingLeft: 0,
-            paddingRight: 0, 
-            overflow: 'hidden', 
-          })}
+            width: { xs: '100%', sm: `calc(100% - ${effectiveSidebarWidth}px)` },
+            transition: 'margin 0.2s ease-in-out',
+            display: 'flex', 
+            flexDirection: 'column'
+          }}
         >
-          <Outlet />
+          {/* Toolbar offset for fixed app bar */}
+          <Box sx={(theme) => ({ 
+            ...theme.mixins.toolbar,
+            flexShrink: 0
+          })} />
+          
+          {/* Content container with padding */}
+          <Container 
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column', 
+              maxWidth: 'none'  // Override default max width
+            }}
+          >
+              <Outlet />
+          </Container>
         </Box>
       </Box>
     </MuiThemeProvider>

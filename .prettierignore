@@ -1,0 +1,28 @@
+# Ignore artifacts:
+dist
+coverage
+
+# Ignore lockfiles:
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore node_modules:
+node_modules
+
+# Vite specific
+.vite
+
+# Environment files
+.env*
+!.env.example
+
+# IDE specific
+.idea
+.vscode
+
+# Build output
+build
+
+# Other
+*.log

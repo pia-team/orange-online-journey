@@ -1,12 +1,10 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 import keycloak from '../keycloak';
 
-// Base API URL
-const BASE_URL = 'https://quote-api.dnextdev-orange.com/api';
+// Default API URL - istek sırasında override edilebilir
 
 // Create axios instance with default config
 const httpClient: AxiosInstance = axios.create({
-  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -63,22 +61,46 @@ httpClient.interceptors.response.use(
 
 // Helper function to create get request with proper types
 export const get = <T>(url: string, config?: AxiosRequestConfig) => {
-  return httpClient.get<T>(url, config);
+  // BaseURL belirtilmemiu015fse default kullan
+  const configWithDefaults = {
+    ...config,
+    baseURL: config?.baseURL
+  };
+  
+  return httpClient.get<T>(url, configWithDefaults);
 };
 
 // Helper function to create post request with proper types
 export const post = <T>(url: string, data?: Record<string, unknown>, config?: AxiosRequestConfig) => {
-  return httpClient.post<T>(url, data, config);
+  // BaseURL belirtilmemiu015fse default kullan
+  const configWithDefaults = {
+    ...config,
+    baseURL: config?.baseURL
+  };
+  
+  return httpClient.post<T>(url, data, configWithDefaults);
 };
 
 // Helper function to create put request with proper types
 export const put = <T>(url: string, data?: Record<string, unknown>, config?: AxiosRequestConfig) => {
-  return httpClient.put<T>(url, data, config);
+  // BaseURL belirtilmemiu015fse default kullan
+  const configWithDefaults = {
+    ...config,
+    baseURL: config?.baseURL
+  };
+  
+  return httpClient.put<T>(url, data, configWithDefaults);
 };
 
 // Helper function to create delete request with proper types
 export const del = <T>(url: string, config?: AxiosRequestConfig) => {
-  return httpClient.delete<T>(url, config);
+  // BaseURL belirtilmemiu015fse default kullan
+  const configWithDefaults = {
+    ...config,
+    baseURL: config?.baseURL
+  };
+  
+  return httpClient.delete<T>(url, configWithDefaults);
 };
 
 export default httpClient;

@@ -7,6 +7,7 @@ import keycloak from './keycloak'; // Your Keycloak instance
 import './index.css';
 import App from './App.tsx';
 import { ThemeProvider } from './ThemeProvider.tsx';
+import orangeLogo from './assets/images/logos/orange-logo.png';
 
 const keycloakInitOptions = {
   onLoad: 'login-required',
@@ -34,7 +35,12 @@ createRoot(document.getElementById('root')!).render(
       initOptions={keycloakInitOptions}
       onEvent={onKeycloakEvent}
       onTokens={onKeycloakTokens}
-      LoadingComponent={<div style={{display: 'flex', justifyContent: 'center'}}>Authenticating with Keycloak... Please wait.</div>} 
+      LoadingComponent={<div style={{display: 'flex', justifyContent: 'center'}}>
+        <img
+          src={orangeLogo}
+          alt="Orange Logo"
+        />
+      </div>} 
     >
       <ThemeProvider>
         <BrowserRouter>

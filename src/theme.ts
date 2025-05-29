@@ -3,7 +3,7 @@ import { orange } from '@mui/material/colors';
 
 const theme = createTheme({
   palette: {
-    mode: 'dark', 
+    mode: 'light', 
     primary: {
       main: orange[500], 
     },
@@ -12,11 +12,11 @@ const theme = createTheme({
     },
     background: {
       default: '#ffffff', 
-      paper: '#1e1e1e',
+      paper: '#ffffff',
     },
     text: {
-      primary: '#ffffff',
-      secondary: 'rgba(255, 255, 255, 0.7)',
+      primary: '#000000',
+      secondary: 'rgba(0, 0, 0, 0.7)',
     }
   },
   typography: {
@@ -34,6 +34,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           maxWidth: '100% !important',
+          padding: '8px 16px !important',
+          marginTop: '8px !important',
         },
       },
     },

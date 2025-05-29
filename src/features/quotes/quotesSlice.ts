@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { get } from '../../services/httpClient';
 import type { Quote, QuoteQueryParams } from '../../services/types';
 import { sortQuotes } from '../../services/quoteService';
 import keycloak from '../../keycloak';
+import axiosInstance from '@/services/axiosConfig';
+const DEFAULT_BASE_URL = 'https://quote-api.dnextdev-orange.com/api';
 
 // Define the quotes state type
 interface QuotesState {
@@ -55,8 +56,9 @@ export const fetchQuotesAsync = createAsyncThunk(
       };
       
       // Make the API request using axios with params
-      const response = await get<Quote[]>('/quoteManagement/v4/quote', {
-        params: axiosParams
+      const response = await axiosInstance.get<Quote[]>('/quoteManagement/v4/quote', {
+        params: axiosParams,
+        baseURL: DEFAULT_BASE_URL
       });
       
       // Get the total count from response headers

@@ -83,7 +83,7 @@ const packages = [
   },
   {
     type: 'Dynamic',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#a5a5a5',
     features: {
       capacityBaseline: 'Premium',
       classOfService: 'Premium',

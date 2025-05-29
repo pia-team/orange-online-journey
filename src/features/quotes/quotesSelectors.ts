@@ -28,7 +28,8 @@ export const selectQuoteTableItems = (state: RootState): QuoteTableItem[] => {
       offerName,
       creationDate: formatDate(quote.createdDate),
       estimatedDate: formatDate(quote.expectedQuoteCompletionDate),
-      owner: quote.createdBy
+      owner: quote.createdBy,
+      quote: quote
     };
   });
 };

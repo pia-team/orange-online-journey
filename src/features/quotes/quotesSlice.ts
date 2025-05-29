@@ -26,7 +26,7 @@ const initialState: QuotesState = {
 const getCustomerId = (): string => {
   try {
     if (keycloak.tokenParsed) {
-      return keycloak.tokenParsed.customer_id || 'F73143540'; // Fallback ID if not in token
+      return keycloak.tokenParsed.Customer_ID; // Fallback ID if not in token
     }
     return 'F73143540'; // Default ID for development
   } catch (error) {

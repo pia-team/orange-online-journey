@@ -3,7 +3,7 @@ import type { RootState } from '../../store';
 import axiosInstance from '../../services/axiosConfig';
 
 // API endpoint for GINI data
-const GINI_API = 'https://afi-obs.apibackbone.api.intraorange/gini-pp/v1/xtra/api/v2/oti_interface';
+const GINI_API = 'https://orange-adapter.dnextdev-orange.com/api/orange-adapter/gini/tmf645/check-customer-interface';
 
 // Interface for GINI interface data
 export interface GiniInterface {

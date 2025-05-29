@@ -103,11 +103,11 @@ const TechnicalFeasibilityForm: React.FC = () => {
   useEffect(() => {
     if (serviceNeeds.endALocation?.id) {
       dispatch(fetchEndAInterfaces({
-        code_rce: '27117624', // Bu parametreler uygulamaya gore guncellenebilir
-        number_intf: 0,
-        pop_id: '100001',
+        code_rce: 'xxx', // Bu parametreler uygulamaya gore guncellenebilir
+        number_intf: 1,
+        pop_id: '282187',
         service_type: 'L2VPN',
-        origin: 'DNEXT'
+        origin: 'ODP'
       }));
     }
   }, [dispatch, serviceNeeds.endALocation]);
@@ -116,11 +116,11 @@ const TechnicalFeasibilityForm: React.FC = () => {
   useEffect(() => {
     if (serviceNeeds.endBLocation?.id) {
       dispatch(fetchEndBInterfaces({
-        code_rce: '27117624', // Bu parametreler uygulamaya gore guncellenebilir
-        number_intf: 0,
-        pop_id: serviceNeeds.endBLocation.id,
+        code_rce: 'xxx', // Bu parametreler uygulamaya gore guncellenebilir
+        number_intf: 1,
+        pop_id: serviceNeeds.endBLocation.id.split('-')[2],
         service_type: 'L2VPN',
-        origin: 'DNEXT'
+        origin: 'ODP'
       }));
     }
   }, [dispatch, serviceNeeds.endBLocation]);

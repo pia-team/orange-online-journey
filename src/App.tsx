@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import MainDashboardPage from './pages/MainDashboardPage';
 import UserManagementPage from './pages/UserManagementPage';
+import CreateQuotePage from './pages/CreateQuotePage';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import './App.css';
 
@@ -34,6 +35,7 @@ function App() {
       <Routes>
       <Route path="/" element={<MainLayout />}>
         <Route index element={<MainDashboardPage />} />
+        <Route path="quote/create" element={<CreateQuotePage />} />
         <Route path="admin/user-management" element={<UserManagementPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

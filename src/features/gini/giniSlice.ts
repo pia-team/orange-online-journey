@@ -77,7 +77,7 @@ export const fetchEndAInterfaces = createAsyncThunk(
     try {
       // API isteu011fi yap
       const response = await axiosInstance.get(GINI_API, {
-        params: params
+        params: params,
       });
       
       // Yanu0131tu0131 console'a yazdu0131r (debug iu00e7in)

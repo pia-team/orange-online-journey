@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import { MoreVert, Close, ShoppingCart } from '@mui/icons-material';
 import { data } from 'react-router-dom';
+import { getTranslatedHeader } from '../../utils/i18n';
 
 // Define the sections and fields to display
 export interface OpportunityField {
@@ -207,7 +208,7 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
             >
               <MenuItem onClick={handleAddProduct}>
                 <ShoppingCart fontSize="small" style={{ marginRight: '8px' }} />
-                <span>Add New Product</span>
+                <span>Edit</span>
               </MenuItem>
             </Menu>
             <IconButton onClick={onClose}>
@@ -258,7 +259,7 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
           {opportunitySections.map((section, sectionIndex) => (
             <div key={sectionIndex} style={{ width: 'calc(50% - 16px)', marginBottom: '24px', backgroundColor: '#f8f9fa', borderRadius: '4px', padding: '16px' }}>
               <Typography variant="h6" component="h3" style={{ marginBottom: '16px', color: '#455a64' }}>
-                {section.sectionTitleKey}
+                {getTranslatedHeader(section.sectionTitleKey)}
               </Typography>
               <List disablePadding>
                 {section.fields.map((field, fieldIndex) => (
@@ -267,7 +268,7 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
                       <div style={{ width: '100%' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                           <Typography variant="body2" style={{ color: '#78909c', fontWeight: 500 }}>
-                            {field.titleKey}
+                            {getTranslatedHeader(field.titleKey)}
                           </Typography>
                           {!field.isNote && (
                             <Typography variant="body2" style={{ color: '#37474f', fontWeight: 400 }}>

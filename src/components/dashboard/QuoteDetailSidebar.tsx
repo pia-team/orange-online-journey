@@ -17,7 +17,7 @@ import {
   MenuItem
 } from '@mui/material';
 import { MoreVert, Close, ShoppingCart } from '@mui/icons-material';
-import { data } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getTranslatedHeader } from '../../utils/i18n';
 
 // Define the sections and fields to display
@@ -48,6 +48,7 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
   onClose,
   onAddNewProduct
 }) => {
+  const navigate = useNavigate();
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
   
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -59,8 +60,14 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
   };
 
   const handleAddProduct = () => {
+    // Call the onAddNewProduct callback for compatibility
     onAddNewProduct();
+    // Close the menu
     handleMenuClose();
+    // Redirect to the quote edit page with the quote ID
+    if (quote && quote.id) {
+      navigate(`/quote/edit/${quote.id}`);
+    }
   };
 
   // Use actual quote items from the selectedQuote object

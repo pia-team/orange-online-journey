@@ -1,5 +1,5 @@
 import type { RootState } from '../../store';
-import type { Quote } from '../../services/types';
+import type { Quote } from '../../types/QuoteManagement/Quote';
 import type { QuoteTableItem } from '../../components/dashboard';
 import { formatDate } from '../../services/quoteService';
 

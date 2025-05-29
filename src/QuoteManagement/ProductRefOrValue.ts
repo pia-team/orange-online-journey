@@ -1,0 +1,47 @@
+import { AgreementItemRef } from "./AgreementItemRef";
+import { BillingAccountRef } from "./BillingAccountRef";
+import { CategoryRef } from "./CategoryRef";
+import { Characteristic } from "./Characteristic";
+import { GeographicAddress } from "./GeographicAddress";
+import { ProductOfferingRef } from "./ProductOfferingRef";
+import { ProductPrice } from "./ProductPrice";
+import { ProductRelationship } from "./ProductRelationship";
+import { ProductSpecificationRef } from "./ProductSpecificationRef";
+import { ProductTerm } from "./ProductTerm";
+import { RelatedParty } from "./RelatedParty";
+import { RelatedProductOrderItem } from "./RelatedProductOrderItem";
+import { ResourceRef } from "./ResourceRef";
+import { ServiceRef } from "./ServiceRef";
+
+export interface ProductRefOrValue {
+    id?: string;
+    href?: string;
+    description?: string;
+    isBundle?: boolean;
+    isCustomerVisible?: boolean;
+    name?: string;
+    orderDate?: string;
+    productSerialNumber?: string;
+    startDate?: string;
+    terminationDate?: string;
+    agreement?: AgreementItemRef[];
+    billingAccount?: BillingAccountRef;
+    place?: GeographicAddress[];
+    product?: string[];
+    productCharacteristic?: Characteristic[];
+    productOffering?: ProductOfferingRef;
+    productOrderItem?: RelatedProductOrderItem[];
+    productPrice?: ProductPrice[];
+    productRelationship?: ProductRelationship[];
+    productSpecification?: ProductSpecificationRef;
+    productTerm?: ProductTerm[];
+    realizingResource?: ResourceRef[];
+    realizingService?: ServiceRef[];
+    relatedParty?: RelatedParty[];
+    status?: string;
+    '@baseType'?: string;
+    '@schemaLocation'?: string;
+    '@type'?: string;
+    '@referredType'?: string;
+    category?: CategoryRef[];
+}

@@ -139,7 +139,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Typography
               variant="subtitle1"
               sx={{
-                color: 'text.primary',
+                color: 'text.white',
                 mt: 1,
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
@@ -151,7 +151,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Typography
               variant="caption"
               sx={{
-                color: 'text.secondary',
+                color: 'text.white',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -164,7 +164,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       </Box>
       <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.2)' }} />
 
-      <List component="nav" sx={{ flexGrow: 1, pt: isEffectivelyOpen ? 1 : 0, backgroundColor: '#2d323e' }}>
+      <List component="nav" 
+      sx={{ flexGrow: 1,
+       pt: isEffectivelyOpen ? 1 : 0, backgroundColor: '#2d323e',
+       '& .MuiTypography-root, & .MuiSvgIcon-root': {
+                color: 'white !important',
+              }, }}>
         {[
           { text: 'Main Page', icon: <DashboardIcon />, path: '/' },
         ].map((item) => (
@@ -194,6 +199,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                   ? 'action.hover'
                   : undefined,
               },
+              '& .MuiTypography-root': {
+                color: 'white !important',
+              },
             }}
           >
             <ListItemIcon
@@ -209,6 +217,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 '&:hover': {
                   color: location.pathname === item.path ? 'common.white' : orange[500],
                 },
+                color: 'white !important',
               }}
             >
               {item.icon}
@@ -239,6 +248,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             px: 2.5,
             mt: 1,
             minHeight: 48,
+            '& .MuiTypography-root': {
+                color: 'white !important',
+              },
           }}
         >
           <ListItemIcon
@@ -252,6 +264,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 duration: theme.transitions.duration.enteringScreen,
               }),
               '&:hover': { color: orange[500] },
+              color: 'white !important',
             }}
           >
             <AdminPanelSettingsIcon />

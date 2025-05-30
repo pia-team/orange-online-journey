@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
@@ -63,10 +63,45 @@ const SummarySignatureForm: React.FC = () => {
   const contactInfo = useSelector(selectContactInformation);
   const requestedDate = useSelector(selectRequestedDate);
 
+  // Calculate minimum date (today + 15 days)
+  const getMinDate = (): string => {
+    const today = new Date();
+    const minDate = new Date();
+    minDate.setDate(today.getDate() + 15);
+    return minDate.toISOString().split('T')[0];
+  };
+  
+  // Initialize requested date on component mount if not already set
+  useEffect(() => {
+    const minDate = getMinDate();
+    // If date is not set or is before minimum date, update it
+    if (!requestedDate.date || new Date(requestedDate.date) < new Date(minDate)) {
+      dispatch(updateRequestedDate({
+        date: minDate
+      }));
+    }
+  }, []);
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(updateRequestedDate({
       date: e.target.value
     }));
+  };
+  
+  // Helper function to extract location data from ID string
+  const extractLocationData = (location: string) => {
+    // Format: "Country/ID/Name/Address/City"
+    if (location && typeof location === 'string') {
+      const parts = location.split('/');
+      if (parts.length >= 5) {
+        return {
+          country: parts[0] || '',
+          address: parts[3] || '',
+          city: parts[4] || ''
+        };
+      }
+    }
+    return null;
   };
 
   return (
@@ -95,13 +130,37 @@ const SummarySignatureForm: React.FC = () => {
                 <strong>Physical address:</strong>
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                60 RUE DES ARCHIVES
+                {(() => {
+                  // First try to use the place data from technicalData
+                  if (technicalData.endA.place?.address) {
+                    return technicalData.endA.place.address;
+                  }
+                  // Try to extract from serviceNeeds location ID
+                  const locationData = extractLocationData(technicalData.endA.location || '');
+                  return locationData?.address || 'No address available';
+                })()}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                75003 PARIS 03
+                {(() => {
+                  // First try to use the place data from technicalData
+                  if (technicalData.endA.place?.city) {
+                    return technicalData.endA.place.city;
+                  }
+                  // Try to extract from serviceNeeds location ID
+                  const locationData = extractLocationData(technicalData.endA.location || '');
+                  return locationData?.city || 'No city available';
+                })()}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                FRANCE
+                {(() => {
+                  // First try to use the place data from technicalData
+                  if (technicalData.endA.place?.country) {
+                    return technicalData.endA.place.country;
+                  }
+                  // Try to extract from serviceNeeds location ID
+                  const locationData = extractLocationData(technicalData.endA.location || '');
+                  return locationData?.country || 'No country available';
+                })()}
               </Typography>
 
               <Box sx={{ mt: 2 }}>
@@ -109,7 +168,7 @@ const SummarySignatureForm: React.FC = () => {
                   <strong>Interface Type:</strong> {technicalData.endA.capacity}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Status:</strong> New
+                  <strong>Status:</strong> {technicalData.endA.connectionMode === 'VLAN' ? 'Existing' : 'New'}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 1 }}>
                   {technicalData.endA.crossConnect ? "✓ Cross connect included" : ""}
@@ -135,13 +194,37 @@ const SummarySignatureForm: React.FC = () => {
                 <strong>Physical address:</strong>
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                17 RUE LECOEUR
+                {(() => {
+                  // First try to use the place data from technicalData
+                  if (technicalData.endB.place?.address) {
+                    return technicalData.endB.place.address;
+                  }
+                  // Try to extract from serviceNeeds location ID
+                  const locationData = extractLocationData(technicalData.endB.location || '');
+                  return locationData?.address || 'No address available';
+                })()}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                ABIDJAN
+                {(() => {
+                  // First try to use the place data from technicalData
+                  if (technicalData.endB.place?.city) {
+                    return technicalData.endB.place.city;
+                  }
+                  // Try to extract from serviceNeeds location ID
+                  const locationData = extractLocationData(technicalData.endB.location || '');
+                  return locationData?.city || 'No city available';
+                })()}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                IVORY COAST
+                {(() => {
+                  // First try to use the place data from technicalData
+                  if (technicalData.endB.place?.country) {
+                    return technicalData.endB.place.country;
+                  }
+                  // Try to extract from serviceNeeds location ID
+                  const locationData = extractLocationData(technicalData.endB.location || '');
+                  return locationData?.country || 'No country available';
+                })()}
               </Typography>
 
               <Box sx={{ mt: 2 }}>
@@ -149,7 +232,7 @@ const SummarySignatureForm: React.FC = () => {
                   <strong>Interface Type:</strong> {technicalData.endB.capacity}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Status:</strong> Existing
+                  <strong>Status:</strong> {technicalData.endB.connectionMode === 'VLAN' ? 'Existing' : 'New'}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 1 }}>
                   {technicalData.endB.crossConnect ? "✓ Cross connect included" : ""}
@@ -172,7 +255,7 @@ const SummarySignatureForm: React.FC = () => {
                 <strong>Monthly fee (all prices are exclusive of tax):</strong>
               </Typography>
               <Typography variant="body2" sx={{ mb: 2 }}>
-                {commercialData.selectedPackage.price.toFixed(2)} €/month
+                {commercialData.selectedPackage.price.toFixed(2)} {commercialData.selectedPackage.currency}/month
               </Typography>
               
               <Typography variant="body2" sx={{ mb: 1 }}>
@@ -248,8 +331,17 @@ const SummarySignatureForm: React.FC = () => {
             type="date"
             value={requestedDate.date}
             onChange={handleDateChange}
+            inputProps={{
+              min: getMinDate(),
+            }}
+            onClick={(e) => {
+              // This will open the calendar picker when clicking anywhere on the field
+              const input = e.currentTarget.querySelector('input');
+              if (input) input.showPicker();
+            }}
             fullWidth
-            InputLabelProps={{ shrink: true }}
+            // This will disable direct text editing but keep the calendar clickable
+            sx={{ '& input': { cursor: 'pointer' } }}
           />
         </Box>
 

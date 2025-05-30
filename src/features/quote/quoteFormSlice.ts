@@ -69,6 +69,11 @@ interface EndpointDetails {
   vlanNumber?: string;
   crossConnect: boolean;
   capacity: string;
+  place: {
+    address: string;
+    city: string;
+    country: string;
+  };
 }
 
 interface TechnicalFeasibilityData {
@@ -127,6 +132,11 @@ interface RequestedDateInfo {
   date: string;
 }
 
+// Step validation state interface
+interface StepValidation {
+  isValid: boolean;
+}
+
 // Complete form state type
 interface QuoteFormState {
   currentStep: number;
@@ -137,12 +147,26 @@ interface QuoteFormState {
   requestedDate: RequestedDateInfo;
   submitting: boolean;
   error: string | null;
+  formValidation: {
+    serviceNeeds: StepValidation;
+    technicalFeasibility: StepValidation;
+    commercialProposal: StepValidation;
+    contactInformation: StepValidation;
+    summarySignature: StepValidation;
+  };
 }
 
 // Initial default data for form state
 const initialState: QuoteFormState = {
   currentStep: 0,
   serviceNeeds: {},
+  formValidation: {
+    serviceNeeds: { isValid: false },
+    technicalFeasibility: { isValid: false },
+    commercialProposal: { isValid: false },
+    contactInformation: { isValid: false },
+    summarySignature: { isValid: true }, // Last step is always valid
+  },
   technicalFeasibility: {
     endA: {
       location: 'Paris 03 / Paris Lab 3',
@@ -156,6 +180,11 @@ const initialState: QuoteFormState = {
       vlanNumber: '23',
       crossConnect: false,
       capacity: '10 Gbps',
+      place: {
+        address: '60 RUE DES ARCHIVES',
+        city: '75003 PARIS 03',
+        country: 'FRANCE',
+      },
     },
     endB: {
       location: 'Abidjan / Paris Lab 1',
@@ -169,6 +198,11 @@ const initialState: QuoteFormState = {
       vlanNumber: '3',
       crossConnect: true,
       capacity: '10 Gbps',
+      place: {
+        address: '17 RUE LECOEUR',
+        city: 'ABIDJAN',
+        country: 'IVORY COAST',
+      },
     },
   },
   commercialProposal: {
@@ -252,7 +286,31 @@ const quoteFormSlice = createSlice({
       state.requestedDate = action.payload;
     },
     nextStep: (state) => {
-      if (state.currentStep < 4) {
+      // Check if current step is valid before proceeding
+      let isCurrentStepValid = false;
+      
+      switch(state.currentStep) {
+        case 0: // Service Needs
+          isCurrentStepValid = state.formValidation.serviceNeeds.isValid;
+          break;
+        case 1: // Technical Feasibility
+          isCurrentStepValid = state.formValidation.technicalFeasibility.isValid;
+          break;
+        case 2: // Commercial Proposal
+          isCurrentStepValid = state.formValidation.commercialProposal.isValid;
+          break;
+        case 3: // Contact Information
+          isCurrentStepValid = state.formValidation.contactInformation.isValid;
+          break;
+        case 4: // Summary Signature
+          isCurrentStepValid = state.formValidation.summarySignature.isValid;
+          break;
+        default:
+          isCurrentStepValid = false;
+      }
+      
+      // Only proceed if current step is valid
+      if (isCurrentStepValid) {
         state.currentStep += 1;
       }
     },
@@ -272,6 +330,28 @@ const quoteFormSlice = createSlice({
     submitFormFailure: (state, action: PayloadAction<string>) => {
       state.submitting = false;
       state.error = action.payload;
+    },
+    setFormValidState: (state, action: PayloadAction<{ step: number; isValid: boolean }>) => {
+      const { step, isValid } = action.payload;
+      switch (step) {
+        case 0:
+          state.formValidation.serviceNeeds.isValid = isValid;
+          break;
+        case 1:
+          state.formValidation.technicalFeasibility.isValid = isValid;
+          break;
+        case 2:
+          state.formValidation.commercialProposal.isValid = isValid;
+          break;
+        case 3:
+          state.formValidation.contactInformation.isValid = isValid;
+          break;
+        case 4:
+          state.formValidation.summarySignature.isValid = isValid;
+          break;
+        default:
+          break;
+      }
     },
     initializeFromQuote: (state, action: PayloadAction<Quote>) => {
       const quote = action.payload;
@@ -336,6 +416,35 @@ const quoteFormSlice = createSlice({
         state.technicalFeasibility.endA.interfaceDetails.interfaceId = 
           characteristics.find(c => c.name === 'PointA_Router')?.value?.toString() || 
           state.technicalFeasibility.endA.interfaceDetails.interfaceId;
+          
+        // Set Point A place data
+        if (product?.place) {
+          const endA = product.place.find(p => p.role?.toLocaleLowerCase() === 'pop a');
+          if (endA) {
+            // First try to use the provided properties
+            let address = endA.streetName || '';
+            let city = `${endA.postcode || ''} ${endA.city || ''}`.trim();
+            let country = endA.country || '';
+            
+            // If id is available in the format "Country/ID/Name/Address/City", extract data from it
+            if (endA.id && typeof endA.id === 'string') {
+              const parts = endA.id.split('/');
+              if (parts.length >= 5) {
+                // Parts[0] = Country, Parts[3] = Address, Parts[4] = City
+                country = parts[0] || country;
+                address = parts[3] || address;
+                city = parts[4] || city;
+              }
+            }
+            
+            state.technicalFeasibility.endA.location = endA.name || state.technicalFeasibility.endA.location;
+            state.technicalFeasibility.endA.place = {
+              address,
+              city,
+              country
+            };
+          }
+        }
         
         state.technicalFeasibility.endA.interfaceDetails.portType = 
           characteristics.find(c => c.name === 'PointA_IntfType')?.value?.toString() || 
@@ -359,6 +468,35 @@ const quoteFormSlice = createSlice({
         state.technicalFeasibility.endB.interfaceDetails.interfaceId = 
           characteristics.find(c => c.name === 'PointB_Router')?.value?.toString() || 
           state.technicalFeasibility.endB.interfaceDetails.interfaceId;
+          
+        // Set Point B place data
+        if (product?.place) {
+          const endB = product.place.find(p => p.role?.toLocaleLowerCase() === 'pop b');
+          if (endB) {
+            // First try to use the provided properties
+            let address = endB.streetName || '';
+            let city = `${endB.postcode || ''} ${endB.city || ''}`.trim();
+            let country = endB.country || '';
+            
+            // If id is available in the format "Country/ID/Name/Address/City", extract data from it
+            if (endB.id && typeof endB.id === 'string') {
+              const parts = endB.id.split('/');
+              if (parts.length >= 5) {
+                // Parts[0] = Country, Parts[3] = Address, Parts[4] = City
+                country = parts[0] || country;
+                address = parts[3] || address;
+                city = parts[4] || city;
+              }
+            }
+            
+            state.technicalFeasibility.endB.location = endB.name || state.technicalFeasibility.endB.location;
+            state.technicalFeasibility.endB.place = {
+              address,
+              city,
+              country
+            };
+          }
+        }
         
         state.technicalFeasibility.endB.interfaceDetails.portType = 
           characteristics.find(c => c.name === 'PointB_IntfType')?.value?.toString() || 
@@ -627,6 +765,7 @@ const quoteFormSlice = createSlice({
         state.requestedDate.date = new Date(quote.expectedQuoteCompletionDate).toISOString().split('T')[0];
       }
     },
+    
   },
 });
 
@@ -645,6 +784,7 @@ export const {
   submitFormSuccess,
   submitFormFailure,
   initializeFromQuote,
+  setFormValidState,
 } = quoteFormSlice.actions;
 
 // Export selectors

@@ -99,7 +99,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
   const endAStatus = useSelector(selectEndAStatus);
   const endBStatus = useSelector(selectEndBStatus);
   
-  // End A POP iu00e7in interface'leri yu00fckle
+  // End A POP için interface'leri yükle ve place bilgilerini güncelle
   useEffect(() => {
     if (serviceNeeds.endALocation?.id) {
       dispatch(fetchEndAInterfaces({
@@ -109,10 +109,24 @@ const TechnicalFeasibilityForm: React.FC = () => {
         service_type: 'L2VPN',
         origin: 'ODP'
       }));
+
+      // Update endA place data with location information
+      const place = serviceNeeds.endALocation.place?.[0] || {};
+      dispatch(updateTechnicalFeasibility({
+        endA: {
+          ...technicalData.endA,
+          location: serviceNeeds.endALocation.name,
+          place: {
+            address: place.streetName || '',
+            city: `${place.postcode || ''} ${place.city || ''}`.trim(),
+            country: place.country || ''
+          }
+        }
+      }));
     }
   }, [dispatch, serviceNeeds.endALocation]);
   
-  // End B POP iu00e7in interface'leri yu00fckle
+  // End B POP için interface'leri yükle ve place bilgilerini güncelle
   useEffect(() => {
     if (serviceNeeds.endBLocation?.id) {
       dispatch(fetchEndBInterfaces({
@@ -121,6 +135,20 @@ const TechnicalFeasibilityForm: React.FC = () => {
         pop_id: serviceNeeds.endBLocation.id.split('-')[2],
         service_type: 'L2VPN',
         origin: 'ODP'
+      }));
+      
+      // Update endB place data with location information
+      const place = serviceNeeds.endBLocation.place?.[0] || {};
+      dispatch(updateTechnicalFeasibility({
+        endB: {
+          ...technicalData.endB,
+          location: serviceNeeds.endBLocation.name,
+          place: {
+            address: place.streetName || '',
+            city: `${place.postcode || ''} ${place.city || ''}`.trim(),
+            country: place.country || ''
+          }
+        }
       }));
     }
   }, [dispatch, serviceNeeds.endBLocation]);

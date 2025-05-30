@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, TextField } from '@mui/material';
+import { Box, Typography, Grid, TextField, Alert } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   updateServiceNeeds, 
-  selectServiceNeeds
+  selectServiceNeeds,
+  setFormValidState
 } from '../../../features/quote/quoteFormSlice';
 import {
   fetchPOPLocations,
@@ -38,6 +39,14 @@ const ServiceNeedsForm: React.FC = () => {
   const [endBInputValue, setEndBInputValue] = useState('');
   const [endASearchTerm, setEndASearchTerm] = useState('');
   const [endBSearchTerm, setEndBSearchTerm] = useState('');
+  
+  // Validation state
+  const [errors, setErrors] = useState({
+    endA: false,
+    endB: false,
+    bandwidth: false
+  });
+  const [showValidation, setShowValidation] = useState(false);
   
   // Redux state'lerini al
   const locations = useSelector(selectPOPLocations);
@@ -76,10 +85,27 @@ const ServiceNeedsForm: React.FC = () => {
     }
   }, [endBInputValue, dispatch]);
 
+  // Validate form and update global form valid state
   useEffect(() => {
-    console.log(serviceNeeds);
+    // Check if all required fields are filled
+    const isEndAValid = !!serviceNeeds.endALocation;
+    const isEndBValid = !!serviceNeeds.endBLocation;
+    const isBandwidthValid = !!serviceNeeds.endBandwidth;
     
-  }, [serviceNeeds]); 
+    // Update local error state
+    setErrors({
+      endA: !isEndAValid && showValidation,
+      endB: !isEndBValid && showValidation,
+      bandwidth: !isBandwidthValid && showValidation
+    });
+    
+    // Update global form valid state
+    const isFormValid = isEndAValid && isEndBValid && isBandwidthValid;
+    dispatch(setFormValidState({
+      step: 0, // Service Needs is step 0
+      isValid: isFormValid
+    }));
+  }, [serviceNeeds, showValidation, dispatch]);
 
   // Handler for bandwidth selection
   const handleBandwidthChange = (endpoint: 'endBandwidth', value: string) => {
@@ -118,7 +144,10 @@ const ServiceNeedsForm: React.FC = () => {
                   getOptionLabel={(option) => `${option.id}, ${option.description}, ${option.name}`}
                   loading={loading}
                   value={selectedEndA}
-                  onChange={(_, newValue) => handlePOPChange('endA', newValue)}
+                  onChange={(_, newValue) => {
+                    handlePOPChange('endA', newValue);
+                    setShowValidation(true); // Show validation after first selection attempt
+                  }}
                   onInputChange={(_, newInputValue) => setEndAInputValue(newInputValue)}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
                   renderInput={(params) => (
@@ -172,7 +201,12 @@ const ServiceNeedsForm: React.FC = () => {
                     id='end-a-bandwidth'
                     value={serviceNeeds.endBandwidth || ''}
                     label='Bandwidth'
-                    onChange={(e) => handleBandwidthChange('endBandwidth', e.target.value)}
+                    required
+                    error={errors.bandwidth}
+                    onChange={(e) => {
+                      handleBandwidthChange('endBandwidth', e.target.value);
+                      setShowValidation(true); // Show validation after first selection attempt
+                    }}
                   >
                     {bandwidthOptions.map((option) => (
                       <MenuItem key={option} value={option}>{option}</MenuItem>
@@ -203,7 +237,10 @@ const ServiceNeedsForm: React.FC = () => {
                   getOptionLabel={(option) => `${option.id}, ${option.description}, ${option.name}`}
                   loading={loading}
                   value={selectedEndB}
-                  onChange={(_, newValue) => handlePOPChange('endB', newValue)}
+                  onChange={(_, newValue) => {
+                    handlePOPChange('endB', newValue);
+                    setShowValidation(true); // Show validation after first selection attempt
+                  }}
                   onInputChange={(_, newInputValue) => setEndBInputValue(newInputValue)}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
                   renderInput={(params) => (
@@ -245,6 +282,12 @@ const ServiceNeedsForm: React.FC = () => {
           </Grid>
         </Grid>
       </EndpointSection>
+      
+      {showValidation && (errors.endA || errors.endB || errors.bandwidth) && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          Please fill in all required fields before proceeding.
+        </Alert>
+      )}
     </Box>
   );
 };

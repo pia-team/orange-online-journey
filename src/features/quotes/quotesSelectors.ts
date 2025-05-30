@@ -1,5 +1,5 @@
 import type { RootState } from '../../store';
-import type { Quote } from '../../services/types';
+import type { Quote } from '../../types/QuoteManagement/Quote';
 import type { QuoteTableItem } from '../../components/dashboard';
 import { formatDate } from '../../services/quoteService';
 
@@ -28,7 +28,8 @@ export const selectQuoteTableItems = (state: RootState): QuoteTableItem[] => {
       offerName,
       creationDate: formatDate(quote.createdDate),
       estimatedDate: formatDate(quote.expectedQuoteCompletionDate),
-      owner: quote.createdBy
+      owner: quote.createdBy,
+      quote: quote
     };
   });
 };

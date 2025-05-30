@@ -23,7 +23,7 @@ import InputLabel from '@mui/material/InputLabel';
 // Icons
 
 // Define bandwidth options
-const bandwidthOptions = ['2M', '4M', '10M', '100M', '1G', '10G'];
+const bandwidthOptions = ['2M', '4M', '10M', '20M', '30M', '40M', '50M', '100M', '200M', '300M', '400M', '500M', '1G', '10G'];
 
 const EndpointSection = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(5),

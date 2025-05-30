@@ -36,6 +36,7 @@ function App() {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<MainDashboardPage />} />
         <Route path="quote/create" element={<CreateQuotePage />} />
+        <Route path="quote/edit/:id" element={<CreateQuotePage />} />
         <Route path="admin/user-management" element={<UserManagementPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

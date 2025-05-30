@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Box, Paper, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Container, Box, Paper, Button, CircularProgress, Typography, Grid, Divider } from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
 import QuoteStepper from '../components/quote/QuoteStepper';
 import ServiceNeedsForm from '../components/quote/steps/ServiceNeedsForm';
 import TechnicalFeasibilityForm from '../components/quote/steps/TechnicalFeasibilityForm';
@@ -12,21 +12,46 @@ import {
   selectCurrentStep, 
   nextStep, 
   prevStep, 
-  resetForm
+  resetForm,
+  initializeFromQuote
 } from '../features/quote/quoteFormSlice';
-import type { AppDispatch } from '../store';
+import { fetchQuoteByIdAsync } from '../features/quotes/quotesSlice';
+import type { AppDispatch, RootState } from '../store';
 
 const CreateQuotePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const activeStep = useSelector(selectCurrentStep);
+  const { selectedQuote, selectedQuoteStatus, selectedQuoteError } = useSelector((state: RootState) => state.quotes);
+  
+  // Track whether the form has been initialized with quote data
+  const [formInitialized, setFormInitialized] = useState(false);
 
   useEffect(() => {
+    // If we have an ID parameter, fetch the quote data
+    if (id) {
+      dispatch(fetchQuoteByIdAsync({ 
+        id, 
+        depth: 2, 
+        expand: 'relatedParty.account' 
+      }));
+    }
+
     // Reset form when component unmounts
     return () => {
       dispatch(resetForm());
     };
-  }, [dispatch]);
+  }, [dispatch, id]);
+  
+  // Initialize form data when quote is fetched
+  useEffect(() => {
+    if (id && selectedQuote && selectedQuoteStatus === 'succeeded' && !formInitialized) {
+      // Initialize form with the fetched quote data
+      dispatch(initializeFromQuote(selectedQuote));
+      setFormInitialized(true);
+    }
+  }, [id, selectedQuote, selectedQuoteStatus, formInitialized, dispatch]);
 
   const handleNext = () => {
     dispatch(nextStep());
@@ -59,8 +84,30 @@ const CreateQuotePage: React.FC = () => {
     }
   };
 
+  // Show loading state while fetching quote data
+  if (id && selectedQuoteStatus === 'loading') {
+    return (
+      <Container maxWidth={false} sx={{ mt: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+        <Typography variant="h6" sx={{ ml: 2 }}>Loading quote data...</Typography>
+      </Container>
+    );
+  }
+
+  // Show error state if fetch failed
+  if (id && selectedQuoteStatus === 'failed') {
+    return (
+      <Container maxWidth={false} sx={{ mt: 4 }}>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 1, backgroundColor: '#ffffff' }}>
+          <Typography variant="h6" color="error">Error loading quote: {selectedQuoteError}</Typography>
+          <Button variant="contained" onClick={() => navigate('/')} sx={{ mt: 2 }}>Return to Dashboard</Button>
+        </Paper>
+      </Container>
+    );
+  }
+
   return (
-    <Container maxWidth={false} sx={{ mt: 4 }}>
+    <Container maxWidth={false} sx={{ mt: 4 }}>  
       <Paper 
         elevation={3} 
         sx={{ 

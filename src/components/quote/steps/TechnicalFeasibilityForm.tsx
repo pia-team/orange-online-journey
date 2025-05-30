@@ -103,11 +103,11 @@ const TechnicalFeasibilityForm: React.FC = () => {
   useEffect(() => {
     if (serviceNeeds.endALocation?.id) {
       dispatch(fetchEndAInterfaces({
-        code_rce: '27117624', // Bu parametreler uygulamaya gore guncellenebilir
-        number_intf: 0,
-        pop_id: '100001',
+        code_rce: 'xxx', // Bu parametreler uygulamaya gore guncellenebilir
+        number_intf: 1,
+        pop_id: '282187',
         service_type: 'L2VPN',
-        origin: 'DNEXT'
+        origin: 'ODP'
       }));
     }
   }, [dispatch, serviceNeeds.endALocation]);
@@ -116,11 +116,11 @@ const TechnicalFeasibilityForm: React.FC = () => {
   useEffect(() => {
     if (serviceNeeds.endBLocation?.id) {
       dispatch(fetchEndBInterfaces({
-        code_rce: '27117624', // Bu parametreler uygulamaya gore guncellenebilir
-        number_intf: 0,
-        pop_id: serviceNeeds.endBLocation.id,
+        code_rce: 'xxx', // Bu parametreler uygulamaya gore guncellenebilir
+        number_intf: 1,
+        pop_id: serviceNeeds.endBLocation.id.split('-')[2],
         service_type: 'L2VPN',
-        origin: 'DNEXT'
+        origin: 'ODP'
       }));
     }
   }, [dispatch, serviceNeeds.endBLocation]);
@@ -180,13 +180,13 @@ const TechnicalFeasibilityForm: React.FC = () => {
                 <>
                   <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{serviceNeeds.endALocation.name}</Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                    {serviceNeeds.endALocation.place[0].streetName}
+                    {serviceNeeds.endALocation?.place[0]?.streetName}
                   </Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                    {serviceNeeds.endALocation.place[0].postcode + ' ' + serviceNeeds.endALocation.place[0].city}
+                    {serviceNeeds.endALocation?.place[0]?.postcode + ' ' + serviceNeeds.endALocation?.place[0]?.city}
                   </Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                    {serviceNeeds.endALocation.place[0].country}
+                    {serviceNeeds.endALocation?.place[0]?.country}
                   </Typography>
                 </>
               ) : (
@@ -205,15 +205,15 @@ const TechnicalFeasibilityForm: React.FC = () => {
             <Grid item xs={10}>
             {serviceNeeds.endBLocation ? (
                 <>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{serviceNeeds.endBLocation.name}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{serviceNeeds?.endBLocation?.name}</Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                    {serviceNeeds.endBLocation.place[0].streetName}
+                    {serviceNeeds?.endBLocation?.place[0]?.streetName}
                   </Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                    {serviceNeeds.endBLocation.place[0].postcode + ' ' + serviceNeeds.endBLocation.place[0].city}
+                    {serviceNeeds?.endBLocation?.place[0]?.postcode + ' ' + serviceNeeds?.endBLocation?.place[0]?.city}
                   </Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                    {serviceNeeds.endBLocation.place[0].country}
+                    {serviceNeeds?.endBLocation?.place[0]?.country}
                   </Typography>
                 </>
               ) : (
@@ -257,10 +257,10 @@ const TechnicalFeasibilityForm: React.FC = () => {
                             <AddressBlock>
 
                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                {serviceNeeds.endALocation.name}
+                {serviceNeeds?.endALocation?.name}
               </Typography>
               <Typography variant="body2">
-                {serviceNeeds.endALocation.description}
+                {serviceNeeds?.endALocation?.description}
               </Typography>
               </AddressBlock>
               )}
@@ -316,13 +316,13 @@ const TechnicalFeasibilityForm: React.FC = () => {
               {endAStatus !== 'loading' && endAStatus !== 'succeeded' && (
                 <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
                   <Typography variant="body2">
-                    {technicalData.endA.interfaceDetails.interfaceId}
+                    {technicalData.endA?.interfaceDetails?.interfaceId}
                   </Typography>
                   <Typography variant="body2">
-                    {technicalData.endA.interfaceDetails.portType}
+                    {technicalData.endA?.interfaceDetails?.portType}
                   </Typography>
                   <Typography variant="body2">
-                    Availability: {technicalData.endA.interfaceDetails.availability}
+                    Availability: {technicalData.endA?.interfaceDetails?.availability}
                   </Typography>
                 </Box>
               )}
@@ -358,7 +358,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
                   <TextField
                     id="vlan-number-a"
                     variant="outlined"
-                    value={technicalData.endA.vlanNumber}
+                    value={technicalData.endA?.vlanNumber}
                     onChange={(e) => handleVlanNumberChange('endA', e.target.value)}
                     size="small"
                     sx={{ width: 200 }}
@@ -371,14 +371,14 @@ const TechnicalFeasibilityForm: React.FC = () => {
               
               <Box sx={{ mt: 3 }}>
                 <CapacityBox>
-                  <div className="capacity-value">{technicalData.endA.capacity}</div>
+                  <div className="capacity-value">{technicalData.endA?.capacity}</div>
                   <div className="capacity-label">New TechSpecialBeam®</div>
                 </CapacityBox>
                 
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={technicalData.endA.crossConnect}
+                      checked={technicalData.endA?.crossConnect}
                       onChange={(e) => handleCrossConnectChange('endA', e.target.checked)}
                       sx={{ color: 'orange', '&.Mui-checked': { color: 'orange' } }}
                     />

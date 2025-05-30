@@ -1,9 +1,10 @@
 import Keycloak from 'keycloak-js';
+import { env } from './config/env';
 
 const keycloakConfig = {
   realm: 'orbitant-realm',
   clientId: 'orbitant-ui-client',
-  url: 'https://diam.dnextdev-orange.com',
+  url: env.keycloakUrl,
   // responseType: 'code', 
   // scope: 'openid',
   // strictDiscoveryDocumentValidation: false, 

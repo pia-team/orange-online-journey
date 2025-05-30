@@ -1,3 +1,4 @@
+import type { Quote } from '../types/QuoteManagement/Quote';
 
 export interface QuoteResponse {
   count: number;

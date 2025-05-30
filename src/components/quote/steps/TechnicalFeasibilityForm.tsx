@@ -26,6 +26,7 @@ import {
   selectEndAStatus,
   selectEndBStatus
 } from '../../../features/gini/giniSlice';
+import { selectCustomerCodeRCE } from '../../../features/customer/customerSelectors';
 import type { AppDispatch } from '../../../store';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -92,7 +93,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const technicalData = useSelector(selectTechnicalFeasibility);
   const serviceNeeds = useSelector(selectServiceNeeds);
-  
+  const customerCodeRCE = useSelector(selectCustomerCodeRCE);
   const endAInterfaces = useSelector(selectEndAInterfaces);
   const endBInterfaces = useSelector(selectEndBInterfaces);
   const endAStatus = useSelector(selectEndAStatus);
@@ -100,12 +101,17 @@ const TechnicalFeasibilityForm: React.FC = () => {
   
   useEffect(() => {
     if (serviceNeeds.endALocation?.id) {
+      // POP ID formatını düzenle
+      const popId = serviceNeeds.endALocation.id.includes('-') ? 
+        serviceNeeds.endALocation.id.split('-')[2] : 
+        serviceNeeds.endALocation.id;
+      
       dispatch(fetchEndAInterfaces({
-        code_rce: 'xxx',
-        number_intf: 1,
-        pop_id: '282187',
+        code_rce: customerCodeRCE || 'xxx',
+        number_intf: 0,
+        pop_id: popId,
         service_type: 'L2VPN',
-        origin: 'ODP'
+        origin: 'DNEXT'
       }));
 
       const place = serviceNeeds.endALocation.place?.[0] || {};
@@ -125,12 +131,17 @@ const TechnicalFeasibilityForm: React.FC = () => {
   
   useEffect(() => {
     if (serviceNeeds.endBLocation?.id) {
+      // POP ID formatını düzenle
+      const popId = serviceNeeds.endBLocation.id.includes('-') ? 
+        serviceNeeds.endBLocation.id.split('-')[2] : 
+        serviceNeeds.endBLocation.id;
+      
       dispatch(fetchEndBInterfaces({
-        code_rce: 'xxx',
-        number_intf: 1,
-        pop_id: serviceNeeds.endBLocation.id.split('-')[2],
+        code_rce: customerCodeRCE || 'xxx',
+        number_intf: 0,
+        pop_id: popId, 
         service_type: 'L2VPN',
-        origin: 'ODP'
+        origin: 'DNEXT'
       }));
       
       const place = serviceNeeds.endBLocation.place?.[0] || {};

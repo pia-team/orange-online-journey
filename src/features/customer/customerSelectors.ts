@@ -1,5 +1,5 @@
 import type { RootState } from '../../store';
-import type { Customer } from '../../services/types';
+import type { Customer, CustomerCharacteristic } from '../../services/types';
 
 export const selectCustomer = (state: RootState): Customer | null => state.customer.data;
 
@@ -16,3 +16,9 @@ export const selectCustomerAccounts = (state: RootState) => state.customer.data?
 export const selectCustomerContacts = (state: RootState) => state.customer.data?.contactMedium || [];
 
 export const selectCustomerCharacteristics = (state: RootState) => state.customer.data?.characteristic || [];
+
+export const selectCustomerCodeRCE = (state: RootState): string => {
+  const characteristics = state.customer.data?.characteristic || [];
+  const codeRCE = characteristics.find((c: CustomerCharacteristic) => c.name.toLocaleLowerCase() === 'coderce');
+  return codeRCE?.value || '';
+};

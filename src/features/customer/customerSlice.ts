@@ -25,10 +25,8 @@ const getCustomerId = (): string => {
     if (keycloak.tokenParsed) {
       return keycloak.tokenParsed.Customer_ID;
     }
-    return 'F46149097';
   } catch (error) {
     console.error('Error getting customer ID from token', error);
-    return 'F46149097';
   }
 };
 

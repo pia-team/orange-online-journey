@@ -1,17 +1,17 @@
-import { AgreementItemRef } from "./AgreementItemRef";
-import { BillingAccountRef } from "./BillingAccountRef";
-import { CategoryRef } from "./CategoryRef";
-import { Characteristic } from "./Characteristic";
-import { GeographicAddress } from "./GeographicAddress";
-import { ProductOfferingRef } from "./ProductOfferingRef";
-import { ProductPrice } from "./ProductPrice";
-import { ProductRelationship } from "./ProductRelationship";
-import { ProductSpecificationRef } from "./ProductSpecificationRef";
-import { ProductTerm } from "./ProductTerm";
-import { RelatedParty } from "./RelatedParty";
-import { RelatedProductOrderItem } from "./RelatedProductOrderItem";
-import { ResourceRef } from "./ResourceRef";
-import { ServiceRef } from "./ServiceRef";
+import { type AgreementItemRef } from "./AgreementItemRef";
+import { type BillingAccountRef } from "./BillingAccountRef";
+import { type CategoryRef } from "./CategoryRef";
+import { type Characteristic } from "./Characteristic";
+import { type GeographicAddress } from "./GeographicAddress";
+import { type ProductOfferingRef } from "./ProductOfferingRef";
+import { type ProductPrice } from "./ProductPrice";
+import { type ProductRelationship } from "./ProductRelationship";
+import { type ProductSpecificationRef } from "./ProductSpecificationRef";
+import { type ProductTerm } from "./ProductTerm";
+import { type RelatedParty } from "./RelatedParty";
+import { type RelatedProductOrderItem } from "./RelatedProductOrderItem";
+import { type ResourceRef } from "./ResourceRef";
+import { type ServiceRef } from "./ServiceRef";
 
 export interface ProductRefOrValue {
     id?: string;

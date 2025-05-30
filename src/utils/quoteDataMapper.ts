@@ -34,8 +34,10 @@ interface MappedQuoteData {
 /**
  * Extract characteristic value from product characteristics
  */
+import { Characteristic } from '../types/QuoteManagement/Characteristic';
+
 const getCharacteristicValue = (
-  characteristics: any[] | undefined,
+  characteristics: Characteristic[] | undefined,
   name: string
 ): string => {
   if (!characteristics || !Array.isArray(characteristics)) {

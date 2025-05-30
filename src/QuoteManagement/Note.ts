@@ -1,4 +1,4 @@
-import { CategoryRef } from './CategoryRef';
+import { type CategoryRef } from './CategoryRef';
 export interface Note {
   id?: string;
   author?: string;

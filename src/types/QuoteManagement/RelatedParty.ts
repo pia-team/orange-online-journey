@@ -1,6 +1,6 @@
-import { Characteristic } from "./Characteristic";
-import { ContactMedium } from "./ContactMedium";
-import { OrganizationIdentification } from "./OrganizationIdentification";
+import { type Characteristic } from "./Characteristic";
+import { type ContactMedium } from "./ContactMedium";
+import { type OrganizationIdentification } from "./OrganizationIdentification";
 
 export interface RelatedParty {
     id?: string;

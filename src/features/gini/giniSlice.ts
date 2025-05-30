@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { RootState } from '../../store';
 import axiosInstance from '../../services/axiosConfig';
 import { api } from '../../config';
+import { selectCustomerCodeRCE } from '../customer/customerSelectors';
 
 
 
@@ -64,11 +65,46 @@ const handleAuth401Error = (error: ApiError): GiniInterface[] => {
 
 export const fetchEndAInterfaces = createAsyncThunk(
   'gini/fetchEndAInterfaces',
-  async (params: GiniApiParams) => {
+  async (params: GiniApiParams, { getState }) => {
     try {
-      const response = await axiosInstance.get(api.gini.CHECK_CUSTOMER_INTERFACE, {
-        params: params,
-      });
+      // Müşteri bilgilerinden code_rce değerini al
+      const state = getState() as RootState;
+      const code_rce = selectCustomerCodeRCE(state) || params.code_rce;
+      
+      // İstenen JSON formatına göre istek gövdesi oluştur
+      const requestBody = {
+        serviceQualificationItem: [
+          {
+            id: "1",
+            service: {
+              serviceCharacteristic: [
+                {
+                  name: "code_rce",
+                  value: code_rce
+                },
+                {
+                  name: "number_intf",
+                  value: params.number_intf.toString()
+                },
+                {
+                  name: "pop_id",
+                  value: params.pop_id
+                },
+                {
+                  name: "service_type",
+                  value: params.service_type
+                },
+                {
+                  name: "origin",
+                  value: params.origin
+                }
+              ]
+            }
+          }
+        ]
+      };
+      
+      const response = await axiosInstance.post(api.gini.CHECK_CUSTOMER_INTERFACE, requestBody);
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       return handleAuth401Error(error as ApiError);
@@ -78,11 +114,45 @@ export const fetchEndAInterfaces = createAsyncThunk(
 
 export const fetchEndBInterfaces = createAsyncThunk(
   'gini/fetchEndBInterfaces',
-  async (params: GiniApiParams) => {
+  async (params: GiniApiParams, { getState }) => {
     try {
-      const response = await axiosInstance.get(api.gini.CHECK_CUSTOMER_INTERFACE, {
-        params: params
-      });
+      // Müşteri bilgilerinden code_rce değerini al
+      const state = getState() as RootState;
+      const code_rce = selectCustomerCodeRCE(state) || params.code_rce;
+      
+      // İstenen JSON formatına göre istek gövdesi oluştur
+      const requestBody = {
+        serviceQualificationItem: [
+          {
+            service: {
+              serviceCharacteristic: [
+                {
+                  name: "code_rce",
+                  value: code_rce
+                },
+                {
+                  name: "number_intf",
+                  value: params.number_intf.toString()
+                },
+                {
+                  name: "pop_id",
+                  value: params.pop_id
+                },
+                {
+                  name: "service_type",
+                  value: params.service_type
+                },
+                {
+                  name: "origin",
+                  value: params.origin
+                }
+              ]
+            }
+          }
+        ]
+      };
+      
+      const response = await axiosInstance.post(api.gini.CHECK_CUSTOMER_INTERFACE, requestBody);
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       return handleAuth401Error(error as ApiError);

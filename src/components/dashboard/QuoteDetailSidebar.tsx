@@ -19,6 +19,8 @@ import {
 import { MoreVert, Close, ShoppingCart } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getTranslatedHeader } from '../../utils/i18n';
+import { type RelatedParty } from '../../types/QuoteManagement/RelatedParty';
+import { type Note } from '../../types/QuoteManagement/Note';
 
 export interface OpportunityField {
   field: string;
@@ -81,12 +83,16 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
           titleKey: 'HEADERS.CONTACT',
           type: 'text',
           isNote: false,
-          valueExtractor: (data: any) =>
-            data?.relatedParty?.find((p: any) => p && p['@type'] === 'RelatedParty')?.name,
+          valueExtractor: (data: Record<string, unknown> | null) =>
+            data?.relatedParty && Array.isArray(data.relatedParty) ?
+              (data.relatedParty as RelatedParty[]).find(p => p && p['@type'] === 'RelatedParty')?.name : 
+              undefined,
         },
         { field: 'account', titleKey: 'HEADERS.ACCOUNT', type: 'text', isNote: false,
-          valueExtractor: (data: any) =>
-            data?.relatedParty?.find((p: any) => p && p['@type'] === 'Customer')?.name,},
+          valueExtractor: (data: Record<string, unknown> | null) =>
+            data?.relatedParty && Array.isArray(data.relatedParty) ?
+              (data.relatedParty as RelatedParty[]).find(p => p && p['@type'] === 'Customer')?.name :
+              undefined,},
         { field: 'estCloseDate', titleKey: 'HEADERS.EST_CLOSE_DATE', type: 'date', isNote: true, noteKey: 'estCloseDate' },
         { field: 'estBillingDate', titleKey: 'HEADERS.EST_BILLING_DATE', type: 'date', isNote: true, noteKey: 'estBillingDate' },
         { field: 'state', titleKey: 'HEADERS.STATUS', type: 'text', isNote: false },
@@ -123,9 +129,22 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
           titleKey: 'HEADERS.BILLING_AFFILIATE',
           type: 'text',
           isNote: false,
-          valueExtractor: (data: any) => 
-            data?.billingAccount?.find((acc: any) => acc && acc?.['@baseType'] === 'BillingAccount')?.
-          characteristic?.find((c: any) => c && c.name === 'billingAffiliate')?.value,
+          valueExtractor: (data: Record<string, unknown> | null) => {
+            type BillingAccountWithCharacteristics = {
+              '@baseType'?: string;
+              characteristic?: Array<{ name?: string; value?: string }>;
+            };
+            
+            if (!data?.billingAccount || !Array.isArray(data.billingAccount)) return undefined;
+            
+            const billingAcc = (data.billingAccount as BillingAccountWithCharacteristics[])
+              .find(acc => acc && acc['@baseType'] === 'BillingAccount');
+              
+            if (!billingAcc?.characteristic || !Array.isArray(billingAcc.characteristic)) return undefined;
+            
+            return billingAcc.characteristic
+              .find(c => c && c.name === 'billingAffiliate')?.value;
+          },
         },
         { field: 'currency', titleKey: 'HEADERS.CURRENCY', type: 'text', isNote: true, noteKey: 'currency' },
         { field: 'broker', titleKey: 'HEADERS.BROKER', type: 'text', isNote: true, noteKey: 'broker' },
@@ -163,8 +182,9 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
     },
   ];
 
-  const getNoteText = (data: any, key: string): string => {
-    return data?.note?.find((x: any) => x?.id === key)?.text;
+  const getNoteText = (data: Record<string, unknown> | null, key: string): string => {
+    if (!data?.note || !Array.isArray(data.note)) return '';
+    return (data.note as Note[]).find(note => note?.id === key)?.text || '';
   };
 
   const renderFieldValue = (field: OpportunityField, data: Record<string, unknown> | null) => {

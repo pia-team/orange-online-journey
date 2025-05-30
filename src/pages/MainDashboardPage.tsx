@@ -14,6 +14,7 @@ import {
   selectQuotesError, 
   selectQuotesTotalCount 
 } from '../features/quotes/quotesSelectors';
+import { selectCustomerName } from '../features/customer/customerSelectors';
 
 const MainDashboardPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,6 +22,9 @@ const MainDashboardPage: React.FC = () => {
   const status = useSelector(selectQuotesStatus);
   const error = useSelector(selectQuotesError);
   const totalCount = useSelector(selectQuotesTotalCount);
+  const customerName = useSelector(selectCustomerName);
+  
+  const companyName = customerName !== 'N/A' ? customerName : '';
   
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -60,7 +64,7 @@ const MainDashboardPage: React.FC = () => {
         boxShadow: 1
       }}>
         {/* Header with company name and title */}
-        <DashboardHeader companyName="Orange" title="Quotes" titleColor="#212121" companyNameColor="#f57c00" />
+        <DashboardHeader companyName={companyName} title="Quotes" titleColor="#212121" companyNameColor="#f57c00" />
         
        
         

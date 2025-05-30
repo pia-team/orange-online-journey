@@ -54,7 +54,6 @@ export const formatDate = (dateString: string): string => {
 export const sortQuotes = (quotes: Quote[]): Quote[] => {
   if (!quotes || quotes.length === 0) return [];
   return [...quotes].sort((a, b) => {
-    // First sort by state (InProgress at the top)
     const stateA = a.state?.toLowerCase() || '';
     const stateB = b.state?.toLowerCase() || '';
     
@@ -65,7 +64,6 @@ export const sortQuotes = (quotes: Quote[]): Quote[] => {
       return 1;
     }
     
-    // Then sort by expectedQuoteCompletionDate in descending order
     const dateA = a.expectedQuoteCompletionDate ? new Date(a.expectedQuoteCompletionDate).getTime() : 0;
     const dateB = b.expectedQuoteCompletionDate ? new Date(b.expectedQuoteCompletionDate).getTime() : 0;
     return dateB - dateA;

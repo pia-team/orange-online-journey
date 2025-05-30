@@ -93,24 +93,21 @@ const TechnicalFeasibilityForm: React.FC = () => {
   const technicalData = useSelector(selectTechnicalFeasibility);
   const serviceNeeds = useSelector(selectServiceNeeds);
   
-  // Gini interface state'leri
   const endAInterfaces = useSelector(selectEndAInterfaces);
   const endBInterfaces = useSelector(selectEndBInterfaces);
   const endAStatus = useSelector(selectEndAStatus);
   const endBStatus = useSelector(selectEndBStatus);
   
-  // End A POP için interface'leri yükle ve place bilgilerini güncelle
   useEffect(() => {
     if (serviceNeeds.endALocation?.id) {
       dispatch(fetchEndAInterfaces({
-        code_rce: 'xxx', // Bu parametreler uygulamaya gore guncellenebilir
+        code_rce: 'xxx',
         number_intf: 1,
         pop_id: '282187',
         service_type: 'L2VPN',
         origin: 'ODP'
       }));
 
-      // Update endA place data with location information
       const place = serviceNeeds.endALocation.place?.[0] || {};
       dispatch(updateTechnicalFeasibility({
         endA: {
@@ -126,18 +123,16 @@ const TechnicalFeasibilityForm: React.FC = () => {
     }
   }, [dispatch, serviceNeeds.endALocation]);
   
-  // End B POP için interface'leri yükle ve place bilgilerini güncelle
   useEffect(() => {
     if (serviceNeeds.endBLocation?.id) {
       dispatch(fetchEndBInterfaces({
-        code_rce: 'xxx', // Bu parametreler uygulamaya gore guncellenebilir
+        code_rce: 'xxx',
         number_intf: 1,
         pop_id: serviceNeeds.endBLocation.id.split('-')[2],
         service_type: 'L2VPN',
         origin: 'ODP'
       }));
       
-      // Update endB place data with location information
       const place = serviceNeeds.endBLocation.place?.[0] || {};
       dispatch(updateTechnicalFeasibility({
         endB: {

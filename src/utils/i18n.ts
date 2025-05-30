@@ -15,7 +15,6 @@ export function getTranslatedHeader(key: string): string {
     if (current && current[part] !== undefined) {
       current = current[part];
     } else {
-      // If we can't find the key, return the original key
       return key;
     }
   }

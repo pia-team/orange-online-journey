@@ -20,7 +20,6 @@ import { MoreVert, Close, ShoppingCart } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getTranslatedHeader } from '../../utils/i18n';
 
-// Define the sections and fields to display
 export interface OpportunityField {
   field: string;
   titleKey: string;
@@ -60,20 +59,15 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
   };
 
   const handleAddProduct = () => {
-    // Call the onAddNewProduct callback for compatibility
     onAddNewProduct();
-    // Close the menu
     handleMenuClose();
-    // Redirect to the quote edit page with the quote ID
     if (quote && quote.id) {
       navigate(`/quote/edit/${quote.id}`);
     }
   };
 
-  // Use actual quote items from the selectedQuote object
   const productData = (quote?.quoteItem as Array<Record<string, unknown>>) || [];
 
-  // Actual opportunity sections mapped from the image
   const opportunitySections: OpportunitySection[] = [
     {
       sectionTitleKey: 'HEADERS.KEY_OPPORTUNITY_INFORMATION',
@@ -169,22 +163,18 @@ const QuoteDetailSidebar: React.FC<QuoteDetailSidebarProps> = ({
     },
   ];
 
-  // Function to get note text from an object based on a key
   const getNoteText = (data: any, key: string): string => {
     return data?.note?.find((x: any) => x?.id === key)?.text;
   };
 
-  // Function to render field value based on type
   const renderFieldValue = (field: OpportunityField, data: Record<string, unknown> | null) => {
     if (field.valueExtractor) {
       return field.valueExtractor(data) || 'N/A';
     }
 
-    // Default fallback value if no extractor is provided
     return field.noteKey || 'N/A';
   };
 
-  // Product columns for reference
   // const productColumns = ['name', 'spec', 'term', 'price', 'priceType', 'bandwidth', 'popA', 'popB'];
 
   return (

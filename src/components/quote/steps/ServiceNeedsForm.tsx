@@ -21,9 +21,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { type AppDispatch } from '../../../store';
 import InputLabel from '@mui/material/InputLabel';
 
-// Icons
-
-// Define bandwidth options
 const bandwidthOptions = ['2M', '4M', '10M', '20M', '30M', '40M', '50M', '100M', '200M', '300M', '400M', '500M', '1G', '10G'];
 
 const EndpointSection = styled(Box)(({ theme }) => ({
@@ -34,13 +31,11 @@ const ServiceNeedsForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const serviceNeeds = useSelector(selectServiceNeeds);
   
-  // Input değerlerini takip etmek için state'ler
   const [endAInputValue, setEndAInputValue] = useState('');
   const [endBInputValue, setEndBInputValue] = useState('');
   const [endASearchTerm, setEndASearchTerm] = useState('');
   const [endBSearchTerm, setEndBSearchTerm] = useState('');
   
-  // Validation state
   const [errors, setErrors] = useState({
     endA: false,
     endB: false,
@@ -48,20 +43,16 @@ const ServiceNeedsForm: React.FC = () => {
   });
   const [showValidation, setShowValidation] = useState(false);
   
-  // Redux state'lerini al
   const locations = useSelector(selectPOPLocations);
   const status = useSelector(selectGeographicSiteStatus);
   const loading = status === 'loading';
   
-  // End A ve End B için ayrı location listelerini filtrele
   const endAOptions = endASearchTerm ? locations : [];
   const endBOptions = endBSearchTerm ? locations : [];
 
-  // Get current selected locations from Redux store
   const selectedEndA = serviceNeeds.endALocation || null;
   const selectedEndB = serviceNeeds.endBLocation || null;
 
-  // Handle searching for End A locations
   useEffect(() => {
     if (endAInputValue.length >= 2) {
       const timeoutId = setTimeout(() => {
@@ -73,7 +64,6 @@ const ServiceNeedsForm: React.FC = () => {
     }
   }, [endAInputValue, dispatch]);
 
-  // Handle searching for End B locations
   useEffect(() => {
     if (endBInputValue.length >= 2) {
       const timeoutId = setTimeout(() => {
@@ -85,36 +75,29 @@ const ServiceNeedsForm: React.FC = () => {
     }
   }, [endBInputValue, dispatch]);
 
-  // Validate form and update global form valid state
   useEffect(() => {
-    // Check if all required fields are filled
     const isEndAValid = !!serviceNeeds.endALocation;
     const isEndBValid = !!serviceNeeds.endBLocation;
     const isBandwidthValid = !!serviceNeeds.endBandwidth;
     
-    // Update local error state
     setErrors({
       endA: !isEndAValid && showValidation,
       endB: !isEndBValid && showValidation,
       bandwidth: !isBandwidthValid && showValidation
     });
     
-    // Update global form valid state
     const isFormValid = isEndAValid && isEndBValid && isBandwidthValid;
     dispatch(setFormValidState({
-      step: 0, // Service Needs is step 0
+      step: 0,
       isValid: isFormValid
     }));
   }, [serviceNeeds, showValidation, dispatch]);
 
-  // Handler for bandwidth selection
   const handleBandwidthChange = (endpoint: 'endBandwidth', value: string) => {
     dispatch(updateServiceNeeds({ [endpoint]: value }));
   };
 
-  // Handler for POP location selection
   const handlePOPChange = (endpoint: 'endA' | 'endB', location: POPLocation | null) => {
-    // Update Redux state with the selected POP location directly
     dispatch(updateServiceNeeds({ 
       [`${endpoint}Location`]: location
     }));
@@ -146,7 +129,7 @@ const ServiceNeedsForm: React.FC = () => {
                   value={selectedEndA}
                   onChange={(_, newValue) => {
                     handlePOPChange('endA', newValue);
-                    setShowValidation(true); // Show validation after first selection attempt
+                    setShowValidation(true);
                   }}
                   onInputChange={(_, newInputValue) => setEndAInputValue(newInputValue)}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -205,7 +188,7 @@ const ServiceNeedsForm: React.FC = () => {
                     error={errors.bandwidth}
                     onChange={(e) => {
                       handleBandwidthChange('endBandwidth', e.target.value);
-                      setShowValidation(true); // Show validation after first selection attempt
+                      setShowValidation(true);
                     }}
                   >
                     {bandwidthOptions.map((option) => (
@@ -239,7 +222,7 @@ const ServiceNeedsForm: React.FC = () => {
                   value={selectedEndB}
                   onChange={(_, newValue) => {
                     handlePOPChange('endB', newValue);
-                    setShowValidation(true); // Show validation after first selection attempt
+                    setShowValidation(true);
                   }}
                   onInputChange={(_, newInputValue) => setEndBInputValue(newInputValue)}
                   isOptionEqualToValue={(option, value) => option.id === value.id}

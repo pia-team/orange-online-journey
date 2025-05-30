@@ -29,7 +29,6 @@ function App() {
     );
   }
 
-  // If authenticated, render the dashboard layout and routes
   if (keycloak.authenticated) {
     return (
       <Routes>

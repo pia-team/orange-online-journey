@@ -60,8 +60,6 @@ const ContactInformationForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const contactInfo = useSelector(selectContactInformation);
 
-  // For demonstration purposes, we'll just trigger an edit mode that would open a dialog
-  // In a real app, you'd implement an edit dialog or in-place editing
   const handleEdit = (section: string) => {
     alert(`Edit ${section} information. In a real app, this would open an edit dialog.`);
   };

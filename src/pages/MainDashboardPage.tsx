@@ -14,26 +14,20 @@ import {
   selectQuotesError, 
   selectQuotesTotalCount 
 } from '../features/quotes/quotesSelectors';
-// QuoteTableItem tipi selector içinde kullanıldığı için burada import edilmesine gerek yok
 
 const MainDashboardPage: React.FC = () => {
-  // Use Redux hooks
   const dispatch = useDispatch<AppDispatch>();
   const quotes = useSelector(selectQuoteTableItems);
   const status = useSelector(selectQuotesStatus);
   const error = useSelector(selectQuotesError);
   const totalCount = useSelector(selectQuotesTotalCount);
   
-  // Pagination state - managed locally in component
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Loading state for UI
   const loading = status === 'loading';
 
-  // Fetch quotes when component mounts or pagination changes
   useEffect(() => {
-    // Fetch quotes from Redux thunk
     dispatch(fetchQuotesAsync({
       limit: rowsPerPage,
       offset: page * rowsPerPage,
@@ -46,8 +40,6 @@ const MainDashboardPage: React.FC = () => {
 
   const handleViewDetails = (quoteId: string) => {
     console.log(`View details for quote: ${quoteId}`);
-    // Implement details view logic here - navigate to details page
-    // Example: history.push(`/quotes/${quoteId}`);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -56,7 +48,7 @@ const MainDashboardPage: React.FC = () => {
 
   const handleRowsPerPageChange = (newRowsPerPage: number) => {
     setRowsPerPage(newRowsPerPage);
-    setPage(0); // Reset to first page when changing rows per page
+    setPage(0);
   };
 
   return (

@@ -262,10 +262,8 @@ const QuoteList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    // Simulate API call to fetch quotes
     const fetchQuotes = async () => {
       try {
-        // In a real application, this would be an API call
         await new Promise(resolve => setTimeout(resolve, 800));
         setQuotes(mockQuotes);
       } catch (error) {
@@ -281,7 +279,7 @@ const QuoteList: React.FC = () => {
   const handleViewDetail = (quote: Quote) => {
     console.log('View detail for quote:', quote);
     setSelectedQuote(quote);
-    setProducts(mockProducts); // In real app, you would fetch products for this quote
+    setProducts(mockProducts);
     setSidebarOpen(true);
   };
 
@@ -291,12 +289,10 @@ const QuoteList: React.FC = () => {
 
   const handleAddNewProduct = () => {
     console.log('Add new product');
-    // Implementation for adding a new product
   };
 
   const handleCreateQuote = () => {
     console.log('Create new quote');
-    // Implementation for creating a new quote
   };
 
   const getStatusChipColor = (status: string) => {

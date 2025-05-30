@@ -17,8 +17,8 @@ All environment variables are accessed through the `env` object:
 ```typescript
 import { env } from '../config';
 
-console.log(env.apiBaseUrl); // Access a variable
-console.log(env.isProduction); // Check environment
+console.log(env.apiBaseUrl);
+console.log(env.isProduction);
 ```
 
 ### API Endpoints
@@ -28,7 +28,6 @@ All API endpoints are centralized and accessed through the `api` object:
 ```typescript
 import { api } from '../config';
 
-// Use in API calls
 axios.get(api.quote.QUOTES);
 axios.get(api.quote.QUOTE_BY_ID(quoteId));
 ```
@@ -52,9 +51,7 @@ export const newApiEndpoints = {
   RESOURCE_BY_ID: (id: string) => `${env.newApiUrl}/resource/${id}`,
 };
 
-// Then add to the api object
 export const api = {
-  // existing endpoints...
   newApi: newApiEndpoints,
 };
 ```

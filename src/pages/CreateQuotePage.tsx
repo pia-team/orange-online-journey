@@ -25,11 +25,9 @@ const CreateQuotePage: React.FC = () => {
   const activeStep = useSelector(selectCurrentStep);
   const { selectedQuote, selectedQuoteStatus, selectedQuoteError } = useSelector((state: RootState) => state.quotes);
   
-  // Track whether the form has been initialized with quote data
   const [formInitialized, setFormInitialized] = useState(false);
 
   useEffect(() => {
-    // If we have an ID parameter, fetch the quote data
     if (id) {
       dispatch(fetchQuoteByIdAsync({ 
         id, 
@@ -38,16 +36,13 @@ const CreateQuotePage: React.FC = () => {
       }));
     }
 
-    // Reset form when component unmounts
     return () => {
       dispatch(resetForm());
     };
   }, [dispatch, id]);
   
-  // Initialize form data when quote is fetched
   useEffect(() => {
     if (id && selectedQuote && selectedQuoteStatus === 'succeeded' && !formInitialized) {
-      // Initialize form with the fetched quote data
       dispatch(initializeFromQuote(selectedQuote));
       setFormInitialized(true);
     }
@@ -62,11 +57,9 @@ const CreateQuotePage: React.FC = () => {
   };
 
   const handleCancel = () => {
-    // Navigate back to dashboard
     navigate('/');
   };
 
-  // Render the current step form based on the activeStep
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
@@ -84,7 +77,6 @@ const CreateQuotePage: React.FC = () => {
     }
   };
 
-  // Show loading state while fetching quote data
   if (id && selectedQuoteStatus === 'loading') {
     return (
       <Container maxWidth={false} sx={{ mt: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -94,7 +86,6 @@ const CreateQuotePage: React.FC = () => {
     );
   }
 
-  // Show error state if fetch failed
   if (id && selectedQuoteStatus === 'failed') {
     return (
       <Container maxWidth={false} sx={{ mt: 4 }}>

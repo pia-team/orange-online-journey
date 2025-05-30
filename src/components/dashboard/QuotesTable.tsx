@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import QuoteDetailSidebar from './QuoteDetailSidebar';
 
-// QuotesTable için tipler
 export interface QuoteTableItem {
   id: string;
   state: string;
@@ -32,28 +31,21 @@ interface QuotesTableProps {
 }
 
 const QuotesTable: React.FC<QuotesTableProps> = ({ quotes }) => {
-  // Get all quotes from Redux store for detail view
   
-  // Sidebar için state'ler
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState<Record<string, unknown> | null>(null);
 
-  // Detay butonuna tıklandığında
   const handleViewDetail = (quote: QuoteTableItem) => {
-    // Cast the quote to Record<string, unknown> to satisfy the type constraint
     setSelectedQuote(quote.quote as Record<string, unknown>);
     setSidebarOpen(true);
   };
 
-  // Sidebar'ı kapat
   const handleCloseSidebar = () => {
     setSidebarOpen(false);
   };
 
-  // Yeni ürün ekleme
   const handleAddNewProduct = () => {
     console.log('Add new product for quote:', selectedQuote);
-    // Yeni ürün ekleme mantığı burada uygulanacak
   };
 
   return (

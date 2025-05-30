@@ -4,7 +4,6 @@ import type { RootState } from '../../store';
 import type { Quote } from '../../types/QuoteManagement/Quote';
 
 
-// Define interfaces for geographic site data
 export interface POPLocation {
   id: string;
   name: string;
@@ -39,10 +38,10 @@ interface Place {
   updatedBy: string;
   city: string;
   postcode: string;
-  updatedDate: string; // ISO tarih formatı
+  updatedDate: string;
   revision: number;
   streetName: string;
-  createdDate: string; // ISO tarih formatı
+  createdDate: string;
   createdBy: string;
 }
 
@@ -54,7 +53,6 @@ interface ServiceNeedsData {
   endBLocation?: GeographicSite | null;
 }
 
-// Technical Feasibility data types
 interface TechnicalInterfaceDetails {
   interfaceId: string;
   portType: string;
@@ -81,12 +79,11 @@ interface TechnicalFeasibilityData {
   endB: EndpointDetails;
 }
 
-// Commercial Proposal data types
 interface CommercialPackage {
   type: 'Essential' | 'Dynamic' | 'Intense';
   price: number;
   currency: string;
-  period: 36 | 24 | 12 | 0; // 0 means no commitment
+  period: 36 | 24 | 12 | 0;
 }
 
 interface CommercialProposalData {
@@ -95,7 +92,6 @@ interface CommercialProposalData {
   recurringCharges: Record<string, number>;
 }
 
-// Contact Information data types
 interface ContactInfo {
   name: string;
   title?: string;
@@ -127,17 +123,14 @@ interface ContactInformationData {
   dataProtectionContact: DataProtectionContact;
 }
 
-// Summary data
 interface RequestedDateInfo {
   date: string;
 }
 
-// Step validation state interface
 interface StepValidation {
   isValid: boolean;
 }
 
-// Complete form state type
 interface QuoteFormState {
   currentStep: number;
   serviceNeeds: ServiceNeedsData;
@@ -156,7 +149,6 @@ interface QuoteFormState {
   };
 }
 
-// Initial default data for form state
 const initialState: QuoteFormState = {
   currentStep: 0,
   serviceNeeds: {},
@@ -165,7 +157,7 @@ const initialState: QuoteFormState = {
     technicalFeasibility: { isValid: false },
     commercialProposal: { isValid: false },
     contactInformation: { isValid: false },
-    summarySignature: { isValid: true }, // Last step is always valid
+    summarySignature: { isValid: true },
   },
   technicalFeasibility: {
     endA: {
@@ -286,30 +278,28 @@ const quoteFormSlice = createSlice({
       state.requestedDate = action.payload;
     },
     nextStep: (state) => {
-      // Check if current step is valid before proceeding
       let isCurrentStepValid = false;
       
       switch(state.currentStep) {
-        case 0: // Service Needs
+        case 0: 
           isCurrentStepValid = state.formValidation.serviceNeeds.isValid;
           break;
-        case 1: // Technical Feasibility
+        case 1:
           isCurrentStepValid = state.formValidation.technicalFeasibility.isValid;
           break;
-        case 2: // Commercial Proposal
+        case 2:
           isCurrentStepValid = state.formValidation.commercialProposal.isValid;
           break;
-        case 3: // Contact Information
+        case 3:
           isCurrentStepValid = state.formValidation.contactInformation.isValid;
           break;
-        case 4: // Summary Signature
+        case 4:
           isCurrentStepValid = state.formValidation.summarySignature.isValid;
           break;
         default:
           isCurrentStepValid = false;
       }
       
-      // Only proceed if current step is valid
       if (isCurrentStepValid) {
         state.currentStep += 1;
       }
@@ -356,30 +346,26 @@ const quoteFormSlice = createSlice({
     initializeFromQuote: (state, action: PayloadAction<Quote>) => {
       const quote = action.payload;
       
-      // Initialize serviceNeeds
       if (quote.quoteItem && quote.quoteItem.length > 0) {
         const quoteItem = quote.quoteItem[0];
         const product = quoteItem.product;
         const characteristics = product?.productCharacteristic || [];
         
-        // Extract bandwidth from characteristics
         const bandwidthChar = characteristics.find(c => c.name?.toLocaleLowerCase() === 'bandwidth');
         if (bandwidthChar?.value) {
           state.serviceNeeds.endBandwidth = bandwidthChar.value.toString();
         }
         
-        // Extract locations from place
         if (product?.place) {
           const endA = product.place.find(p => p.role?.toLocaleLowerCase() === 'pop a');
           const endB = product.place.find(p => p.role?.toLocaleLowerCase() === 'pop b');
           
-          // This is simplified - in a real application, you'd need to match the location data structure
           if (endA) {
             state.serviceNeeds.endALocation = {
               id: endA.id || '',
               href: '',
               name: endA.name || '',
-              description: endA.description || '', // Using name as description
+              description: endA.description || '',
               status: '',
               code: '',
               place: [],
@@ -406,31 +392,25 @@ const quoteFormSlice = createSlice({
         }
       }
       
-      // Initialize technicalFeasibility
       if (quote.quoteItem && quote.quoteItem.length > 0) {
         const quoteItem = quote.quoteItem[0];
         const product = quoteItem.product;
         const characteristics = product?.productCharacteristic || [];
         
-        // Process Point A details
         state.technicalFeasibility.endA.interfaceDetails.interfaceId = 
           characteristics.find(c => c.name === 'PointA_Router')?.value?.toString() || 
           state.technicalFeasibility.endA.interfaceDetails.interfaceId;
           
-        // Set Point A place data
         if (product?.place) {
           const endA = product.place.find(p => p.role?.toLocaleLowerCase() === 'pop a');
           if (endA) {
-            // First try to use the provided properties
             let address = endA.streetName || '';
             let city = `${endA.postcode || ''} ${endA.city || ''}`.trim();
             let country = endA.country || '';
             
-            // If id is available in the format "Country/ID/Name/Address/City", extract data from it
             if (endA.id && typeof endA.id === 'string') {
               const parts = endA.id.split('/');
               if (parts.length >= 5) {
-                // Parts[0] = Country, Parts[3] = Address, Parts[4] = City
                 country = parts[0] || country;
                 address = parts[3] || address;
                 city = parts[4] || city;
@@ -464,25 +444,20 @@ const quoteFormSlice = createSlice({
           characteristics.find(c => c.name === 'PointA_IntfCapacity')?.value?.toString() || 
           state.technicalFeasibility.endA.capacity;
         
-        // Process Point B details
         state.technicalFeasibility.endB.interfaceDetails.interfaceId = 
           characteristics.find(c => c.name === 'PointB_Router')?.value?.toString() || 
           state.technicalFeasibility.endB.interfaceDetails.interfaceId;
           
-        // Set Point B place data
         if (product?.place) {
           const endB = product.place.find(p => p.role?.toLocaleLowerCase() === 'pop b');
           if (endB) {
-            // First try to use the provided properties
             let address = endB.streetName || '';
             let city = `${endB.postcode || ''} ${endB.city || ''}`.trim();
             let country = endB.country || '';
             
-            // If id is available in the format "Country/ID/Name/Address/City", extract data from it
             if (endB.id && typeof endB.id === 'string') {
               const parts = endB.id.split('/');
               if (parts.length >= 5) {
-                // Parts[0] = Country, Parts[3] = Address, Parts[4] = City
                 country = parts[0] || country;
                 address = parts[3] || address;
                 city = parts[4] || city;
@@ -517,12 +492,10 @@ const quoteFormSlice = createSlice({
           state.technicalFeasibility.endB.capacity;
       }
       
-      // Initialize commercialProposal
       if (quote.quoteItem && quote.quoteItem.length > 0) {
         const quoteItem = quote.quoteItem[0];
         const product = quoteItem.product;
         
-        // Set the offer type based on productOffering
         if (product?.productOffering?.name) {
           const offerType = product.productOffering.name.includes('Essential') ? 'Essential' : 
                            product.productOffering.name.includes('Dynamic') ? 'Dynamic' : 
@@ -532,7 +505,6 @@ const quoteFormSlice = createSlice({
           state.commercialProposal.selectedPackage.type = offerType as 'Essential' | 'Dynamic' | 'Intense';
         }
         
-        // Set commitment period based on productTerm
         if (product?.productTerm && Array.isArray(product.productTerm) && product.productTerm.length > 0) {
           const term = product.productTerm[0].name || '';
           state.commercialProposal.selectedPackage.period = 
@@ -541,25 +513,21 @@ const quoteFormSlice = createSlice({
             term.includes('12') ? 12 : 0;
         }
         
-        // Set price information from quoteItemPrice
         if (quoteItem.quoteItemPrice && quoteItem.quoteItemPrice.length > 0) {
           const prices = quoteItem.quoteItemPrice;
           const mainPrice = prices.find(p => p.name === 'RecurringCharge');
           if (mainPrice?.price && typeof mainPrice.price === 'object') {
-            // Handle different price structure safely
             const priceValue = Object.prototype.hasOwnProperty.call(mainPrice.price, 'value') ? 
               (mainPrice.price as Record<string, unknown>).value as string | number : 0;
             
             state.commercialProposal.selectedPackage.price = Number(priceValue);
             
-            // Handle unit safely
             const priceUnit = Object.prototype.hasOwnProperty.call(mainPrice.price, 'unit') ? 
               (mainPrice.price as Record<string, unknown>).unit as string : '€';
               
             state.commercialProposal.selectedPackage.currency = priceUnit;
           }
           
-          // Set installation fee
           const installationPrice = prices.find(p => p.name === 'InstallationFee');
           if (installationPrice?.price && typeof installationPrice.price === 'object') {
             const installValue = Object.prototype.hasOwnProperty.call(installationPrice.price, 'value') ? 
@@ -570,16 +538,13 @@ const quoteFormSlice = createSlice({
         }
       }
       
-      // Initialize contact information from relatedParty array based on roles
       if (quote.relatedParty && Array.isArray(quote.relatedParty)) {
-        // Find commercial contact (usually has role 'commercial' or similar)
         const commercialContact = quote.relatedParty.find(party => 
           party.role?.toLowerCase().includes('commercial') || 
           party.role?.toLowerCase().includes('sales') ||
           party.role?.toLowerCase() === 'contact');
           
         if (commercialContact) {
-          // Get contact medium data (email, phone) if available
           const contactEmail = commercialContact.contactMedium?.find(cm => 
             cm.mediumType?.toLowerCase() === 'email')?.characteristic?.emailAddress || '';
             
@@ -587,14 +552,11 @@ const quoteFormSlice = createSlice({
             cm.mediumType?.toLowerCase() === 'phone' || 
             cm.mediumType?.toLowerCase() === 'mobile')?.characteristic?.phoneNumber || '';
           
-          // Get organization or company name from characteristics or tradingName
           const companyName = commercialContact.tradingName || commercialContact.organizationType || '';
           
-          // Get title or role from characteristics if available
           const contactTitle = commercialContact.partyCharacteristic?.find(c => 
             c.name?.toLowerCase() === 'title' || c.name?.toLowerCase() === 'role')?.value?.toString() || '';
           
-          // Get address information if available
           const addressMedium = commercialContact.contactMedium?.find(cm => 
             cm.mediumType?.toLowerCase() === 'address')?.characteristic;
             
@@ -616,13 +578,11 @@ const quoteFormSlice = createSlice({
           };
         }
         
-        // Find technical contact
         const technicalContact = quote.relatedParty.find(party => 
           party.role?.toLowerCase().includes('technical') || 
           party.role?.toLowerCase().includes('tech'));
           
         if (technicalContact) {
-          // Get contact medium data (email, phone) if available
           const contactEmail = technicalContact.contactMedium?.find(cm => 
             cm.mediumType?.toLowerCase() === 'email')?.characteristic?.emailAddress || '';
             
@@ -630,14 +590,11 @@ const quoteFormSlice = createSlice({
             cm.mediumType?.toLowerCase() === 'phone' || 
             cm.mediumType?.toLowerCase() === 'mobile')?.characteristic?.phoneNumber || '';
           
-          // Get organization or company name from characteristics or tradingName
           const companyName = technicalContact.tradingName || technicalContact.organizationType || '';
           
-          // Get title or role from characteristics if available
           const contactTitle = technicalContact.partyCharacteristic?.find(c => 
             c.name?.toLowerCase() === 'title' || c.name?.toLowerCase() === 'role')?.value?.toString() || '';
           
-          // Get address information if available
           const addressMedium = technicalContact.contactMedium?.find(cm => 
             cm.mediumType?.toLowerCase() === 'address')?.characteristic;
             
@@ -659,14 +616,12 @@ const quoteFormSlice = createSlice({
           };
         }
         
-        // Find billing contact
         const billingContact = quote.relatedParty.find(party => 
           party.role?.toLowerCase().includes('billing') || 
           party.role?.toLowerCase().includes('finance') ||
           party.role?.toLowerCase().includes('payment'));
           
         if (billingContact) {
-          // Get contact medium data (email, phone) if available
           const contactEmail = billingContact.contactMedium?.find(cm => 
             cm.mediumType?.toLowerCase() === 'email')?.characteristic?.emailAddress || '';
             
@@ -674,14 +629,11 @@ const quoteFormSlice = createSlice({
             cm.mediumType?.toLowerCase() === 'phone' || 
             cm.mediumType?.toLowerCase() === 'mobile')?.characteristic?.phoneNumber || '';
           
-          // Get organization or company name from characteristics or tradingName
           const companyName = billingContact.tradingName || billingContact.organizationType || '';
           
-          // Get title or role from characteristics if available
           const contactTitle = billingContact.partyCharacteristic?.find(c => 
             c.name?.toLowerCase() === 'title' || c.name?.toLowerCase() === 'role')?.value?.toString() || '';
           
-          // Get address information if available
           const addressMedium = billingContact.contactMedium?.find(cm => 
             cm.mediumType?.toLowerCase() === 'address')?.characteristic;
             
@@ -703,14 +655,12 @@ const quoteFormSlice = createSlice({
           };
         }
         
-        // Find fault management contact
         const faultContact = quote.relatedParty.find(party => 
           party.role?.toLowerCase().includes('fault') || 
           party.role?.toLowerCase().includes('maintenance') ||
           party.role?.toLowerCase().includes('support'));
           
         if (faultContact) {
-          // Get contact medium data (email, phone) if available
           const contactEmail = faultContact.contactMedium?.find(cm => 
             cm.mediumType?.toLowerCase() === 'email')?.characteristic?.emailAddress || '';
             
@@ -718,10 +668,8 @@ const quoteFormSlice = createSlice({
             cm.mediumType?.toLowerCase() === 'phone' || 
             cm.mediumType?.toLowerCase() === 'mobile')?.characteristic?.phoneNumber || '';
           
-          // Get organization or company name from characteristics or tradingName
           const groupName = faultContact.tradingName || faultContact.organizationType || 'NOC';
           
-          // Get working hours from characteristics if available
           const workingHours = faultContact.partyCharacteristic?.find(c => 
             c.name?.toLowerCase().includes('hours') || 
             c.name?.toLowerCase().includes('availability'))?.value?.toString() || '24/7';
@@ -735,14 +683,12 @@ const quoteFormSlice = createSlice({
           };
         }
         
-        // Data protection contact
         const dataProtectionContact = quote.relatedParty.find(party => 
           party.role?.toLowerCase().includes('data') || 
           party.role?.toLowerCase().includes('protection') ||
           party.role?.toLowerCase().includes('privacy'));
           
         if (dataProtectionContact) {
-          // Get contact medium data (email, phone) if available
           const contactEmail = dataProtectionContact.contactMedium?.find(cm => 
             cm.mediumType?.toLowerCase() === 'email')?.characteristic?.emailAddress || '';
             
@@ -758,7 +704,6 @@ const quoteFormSlice = createSlice({
         }
       }
       
-      // For requestedDate, use expectedQuoteCompletionDate or requestedQuoteCompletionDate
       if (quote.requestedQuoteCompletionDate) {
         state.requestedDate.date = new Date(quote.requestedQuoteCompletionDate).toISOString().split('T')[0];
       } else if (quote.expectedQuoteCompletionDate) {
@@ -769,7 +714,6 @@ const quoteFormSlice = createSlice({
   },
 });
 
-// Export actions
 export const {
   setCurrentStep,
   updateServiceNeeds,
@@ -787,7 +731,6 @@ export const {
   setFormValidState,
 } = quoteFormSlice.actions;
 
-// Export selectors
 export const selectCurrentStep = (state: RootState) => state.quoteForm.currentStep;
 export const selectServiceNeeds = (state: RootState) => state.quoteForm.serviceNeeds;
 export const selectTechnicalFeasibility = (state: RootState) => state.quoteForm.technicalFeasibility;

@@ -15,7 +15,6 @@ const CreateQuoteButton: React.FC<CreateQuoteButtonProps> = ({ onClick }) => {
     if (onClick) {
       onClick();
     } else {
-      // Navigate to the create quote page
       navigate('/quote/create');
     }
   };

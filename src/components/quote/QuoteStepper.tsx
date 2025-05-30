@@ -21,7 +21,7 @@ const StyledStepper = styled(Stepper)(({ theme }) => ({
     },
   },
   '& .MuiStepLabel-label': {
-    color: theme.palette.text.primary, // Ensure text is always visible
+    color: theme.palette.text.primary,
     fontWeight: 500,
     '&.Mui-active': {
       color: theme.palette.primary.main,

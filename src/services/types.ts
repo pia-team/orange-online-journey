@@ -19,7 +19,6 @@ export interface QuoteQueryParams extends PaginationParams {
   expand?: string;
 }
 
-// Customer API response types
 
 export interface CustomerAddress {
   role: string;

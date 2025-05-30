@@ -63,7 +63,6 @@ const SummarySignatureForm: React.FC = () => {
   const contactInfo = useSelector(selectContactInformation);
   const requestedDate = useSelector(selectRequestedDate);
 
-  // Calculate minimum date (today + 15 days)
   const getMinDate = (): string => {
     const today = new Date();
     const minDate = new Date();
@@ -71,10 +70,8 @@ const SummarySignatureForm: React.FC = () => {
     return minDate.toISOString().split('T')[0];
   };
   
-  // Initialize requested date on component mount if not already set
   useEffect(() => {
     const minDate = getMinDate();
-    // If date is not set or is before minimum date, update it
     if (!requestedDate.date || new Date(requestedDate.date) < new Date(minDate)) {
       dispatch(updateRequestedDate({
         date: minDate
@@ -88,9 +85,7 @@ const SummarySignatureForm: React.FC = () => {
     }));
   };
   
-  // Helper function to extract location data from ID string
   const extractLocationData = (location: string) => {
-    // Format: "Country/ID/Name/Address/City"
     if (location && typeof location === 'string') {
       const parts = location.split('/');
       if (parts.length >= 5) {
@@ -131,33 +126,27 @@ const SummarySignatureForm: React.FC = () => {
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 {(() => {
-                  // First try to use the place data from technicalData
                   if (technicalData.endA.place?.address) {
                     return technicalData.endA.place.address;
                   }
-                  // Try to extract from serviceNeeds location ID
                   const locationData = extractLocationData(technicalData.endA.location || '');
                   return locationData?.address || 'No address available';
                 })()}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 {(() => {
-                  // First try to use the place data from technicalData
                   if (technicalData.endA.place?.city) {
                     return technicalData.endA.place.city;
                   }
-                  // Try to extract from serviceNeeds location ID
                   const locationData = extractLocationData(technicalData.endA.location || '');
                   return locationData?.city || 'No city available';
                 })()}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 {(() => {
-                  // First try to use the place data from technicalData
                   if (technicalData.endA.place?.country) {
                     return technicalData.endA.place.country;
                   }
-                  // Try to extract from serviceNeeds location ID
                   const locationData = extractLocationData(technicalData.endA.location || '');
                   return locationData?.country || 'No country available';
                 })()}
@@ -195,33 +184,27 @@ const SummarySignatureForm: React.FC = () => {
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 {(() => {
-                  // First try to use the place data from technicalData
                   if (technicalData.endB.place?.address) {
                     return technicalData.endB.place.address;
                   }
-                  // Try to extract from serviceNeeds location ID
                   const locationData = extractLocationData(technicalData.endB.location || '');
                   return locationData?.address || 'No address available';
                 })()}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 {(() => {
-                  // First try to use the place data from technicalData
                   if (technicalData.endB.place?.city) {
                     return technicalData.endB.place.city;
                   }
-                  // Try to extract from serviceNeeds location ID
                   const locationData = extractLocationData(technicalData.endB.location || '');
                   return locationData?.city || 'No city available';
                 })()}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 {(() => {
-                  // First try to use the place data from technicalData
                   if (technicalData.endB.place?.country) {
                     return technicalData.endB.place.country;
                   }
-                  // Try to extract from serviceNeeds location ID
                   const locationData = extractLocationData(technicalData.endB.location || '');
                   return locationData?.country || 'No country available';
                 })()}
@@ -335,12 +318,10 @@ const SummarySignatureForm: React.FC = () => {
               min: getMinDate(),
             }}
             onClick={(e) => {
-              // This will open the calendar picker when clicking anywhere on the field
               const input = e.currentTarget.querySelector('input');
               if (input) input.showPicker();
             }}
             fullWidth
-            // This will disable direct text editing but keep the calendar clickable
             sx={{ '& input': { cursor: 'pointer' } }}
           />
         </Box>

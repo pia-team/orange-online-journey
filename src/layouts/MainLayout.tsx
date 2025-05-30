@@ -60,7 +60,7 @@ const MainLayout: React.FC = () => {
               flex: 1,
               display: 'flex',
               flexDirection: 'column', 
-              maxWidth: 'none'  // Override default max width
+              maxWidth: 'none'
             }}
           >
               <Outlet />

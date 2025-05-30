@@ -54,18 +54,14 @@ const getCharacteristicValue = (
 export const mapQuoteData = (quote: Quote | null): MappedQuoteData | null => {
   if (!quote) return null;
 
-  // Default quoteItem to the first item if it exists
   const quoteItem = Array.isArray(quote.quoteItem) && quote.quoteItem.length > 0 
     ? quote.quoteItem[0] 
     : undefined;
 
-  // Default product to the quoteItem's product if it exists
   const product = quoteItem?.product;
 
-  // Default productCharacteristic to the product's characteristics if they exist
   const productCharacteristic = product?.productCharacteristic;
 
-  // Calculate dates
   const createdDate = quote.createdDate ? new Date(quote.createdDate) : new Date();
   const expectedDate = addDays(createdDate, 7);
   const requestedDate = addBusinessDays(createdDate, 15);
@@ -80,11 +76,11 @@ export const mapQuoteData = (quote: Quote | null): MappedQuoteData | null => {
     existingInterfaceAvailabilityA: 
       getCharacteristicValue(productCharacteristic, 'PointA_IsPhysIntf') + ' / ' +
       getCharacteristicValue(productCharacteristic, 'PointA_IntfCapacity'),
-    existingInterfaceTypeB: getCharacteristicValue(productCharacteristic, 'PonitB_IntfType'), // Note: There's a typo in the mapping (Ponit vs Point)
+    existingInterfaceTypeB: getCharacteristicValue(productCharacteristic, 'PonitB_IntfType'),
     existingInterfaceRouterB: getCharacteristicValue(productCharacteristic, 'PointB_Router'),
     existingInterfaceAvailabilityB: 
-      getCharacteristicValue(productCharacteristic, 'PointA_IsPhysIntf') + ' / ' + // Note: This should probably be PointB_IsPhysIntf
-      getCharacteristicValue(productCharacteristic, 'PointA_IntfCapacity'),  // Note: This should probably be PointB_IntfCapacity
+      getCharacteristicValue(productCharacteristic, 'PointA_IsPhysIntf') + ' / ' + 
+      getCharacteristicValue(productCharacteristic, 'PointA_IntfCapacity'),
     vlanA: getCharacteristicValue(productCharacteristic, 'PointA_VLAN'),
     vlanB: getCharacteristicValue(productCharacteristic, 'PointB_VLAN'),
     portModeA: getCharacteristicValue(productCharacteristic, 'PointA_PortMode'),

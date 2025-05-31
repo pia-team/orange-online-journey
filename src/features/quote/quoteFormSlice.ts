@@ -60,11 +60,10 @@ interface TechnicalInterfaceDetails {
   speed: string;
 }
 
-interface EndpointDetails {
+export interface EndpointDetails {
   location: string;
   interfaceDetails: TechnicalInterfaceDetails;
   connectionMode: 'VLAN' | 'PORT';
-  connectionModeNew: 'VLAN' | 'PORT';
   connectionModeNewInterface: 'VLAN' | 'PORT';
   vlanNumber: string;
   vlanNumberNewInterface: string;
@@ -190,7 +189,6 @@ const initialState: QuoteFormState = {
       },
       connectionModeNewInterface: 'PORT',
       connectionMode: 'PORT',
-      connectionModeNew: 'PORT',
       vlanNumberNewInterface: '',
       vlanNumber: '',
       crossConnect: false,
@@ -220,7 +218,6 @@ const initialState: QuoteFormState = {
       },
       connectionModeNewInterface: 'PORT',
       connectionMode: 'PORT',
-      connectionModeNew: 'PORT',
       vlanNumberNewInterface: '',
       vlanNumber: '',
       crossConnect: true,
@@ -402,6 +399,7 @@ const quoteFormSlice = createSlice({
               href: '',
               name: endA.name || '',
               // No description field in GeographicAddress type
+              description: '',
               status: '',
               code: '',
               place: [],
@@ -418,6 +416,7 @@ const quoteFormSlice = createSlice({
               name: endB.name || '',
               // No description field in GeographicAddress type
               status: '',
+              description: '',
               code: '',
               place: [],
               '@baseType': '',

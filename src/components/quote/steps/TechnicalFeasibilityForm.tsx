@@ -17,7 +17,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { updateTechnicalFeasibility, selectTechnicalFeasibility, selectServiceNeeds, setFormValidState } from '../../../features/quote/quoteFormSlice';
+import { updateTechnicalFeasibility, selectTechnicalFeasibility, selectServiceNeeds, setFormValidState, type EndpointDetails } from '../../../features/quote/quoteFormSlice';
 import { 
   fetchEndAInterfaces, 
   fetchEndBInterfaces,
@@ -281,7 +281,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
         
         const endA = {
             ...technicalData.endA,
-            connectionMode: characteristics['vlan_id'].split(',')[0] ? 'VLAN' : 'PORT',
+            connectionMode: (characteristics['vlan_id'].split(',')[0] ? 'VLAN' : 'PORT') as 'VLAN' | 'PORT',
             vlanNumber: characteristics['vlan_id'].split(',')[0] || technicalData.endA.vlanNumber,
             interface: characteristics['interface'] || technicalData.endA.interface,
             router: characteristics['router'] || technicalData.endA.router,
@@ -289,7 +289,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
             bw_max: characteristics['bw_max'] || technicalData.endA.bw_max,
             l2_capacity_max: l2CapacityMax || technicalData.endA.l2_capacity_max,
             l3_capacity_max: l3CapacityMax || technicalData.endA.l3_capacity_max,
-            connectionModeNewInterface: characteristics['vlan_id'].split(',')[1] ? 'VLAN' : 'PORT',
+            connectionModeNewInterface: (characteristics['vlan_id'].split(',')[1] ? 'VLAN' : 'PORT') as 'VLAN' | 'PORT',
             vlanNumberNewInterface: characteristics['vlan_id'].split(',')[1] || technicalData.endA.vlanNumberNewInterface,
             // Update other fields as needed
           }
@@ -387,7 +387,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
        
            const endB = {
             ...technicalData.endB,
-            connectionMode: characteristics['vlan_id'].split(',')[0] ? 'VLAN' : 'PORT',
+            connectionMode: (characteristics['vlan_id'].split(',')[0] ? 'VLAN' : 'PORT') as 'VLAN' | 'PORT',
             vlanNumber: characteristics['vlan_id'].split(',')[0] || technicalData.endB.vlanNumber,
             interface: characteristics['interface'] || technicalData.endB.interface,
             router: characteristics['router'] || technicalData.endB.router,
@@ -395,7 +395,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
             bw_max: characteristics['bw_max'] || technicalData.endB.bw_max,
             l2_capacity_max: l2CapacityMax || technicalData.endB.l2_capacity_max,
             l3_capacity_max: l3CapacityMax || technicalData.endB.l3_capacity_max,
-            connectionModeNewInterface: characteristics['vlan_id'].split(',')[1] ? 'VLAN' : 'PORT',
+            connectionModeNewInterface: (characteristics['vlan_id'].split(',')[1] ? 'VLAN' : 'PORT') as 'VLAN' | 'PORT',
             vlanNumberNewInterface: characteristics['vlan_id'].split(',')[1] || technicalData.endB.vlanNumberNewInterface,
           }
        
@@ -431,17 +431,55 @@ const TechnicalFeasibilityForm: React.FC = () => {
     }));
   };
 
+  // Check for duplicate VLAN numbers within the same endpoint
+  const checkDuplicateVlan = (endpoint: 'endA' | 'endB', value: string, isNewInterface: boolean): boolean => {
+    if (!value) return false;
+    
+    // Check if the value exists in the other field of the same endpoint
+    const otherFieldValue = isNewInterface 
+      ? technicalData[endpoint].vlanNumber 
+      : technicalData[endpoint].vlanNumberNewInterface;
+      
+    return value === otherFieldValue && otherFieldValue !== '';
+  };
+  
   const handleVlanNumberChange = (endpoint: 'endA' | 'endB', value: string, isNewInterface = false) => {
-    dispatch(updateTechnicalFeasibility({
+    // Only allow numeric input
+    if (value !== '' && !/^\d+$/.test(value)) {
+      return; // Reject non-numeric input
+    }
+    
+    // Check if value is within the valid range (2-4094)
+    const numericValue = value === '' ? 0 : parseInt(value, 10);
+    if (value !== '' && (numericValue < 2 || numericValue > 4094)) {
+      return; // Reject out-of-range values
+    }
+    
+    // Check for duplicates within the same endpoint
+    const isDuplicate = checkDuplicateVlan(endpoint, value, isNewInterface);
+    
+    // Update the error state for this endpoint's VLAN field
+    setErrors(prev => ({
+      ...prev,
       [endpoint]: {
-        ...technicalData[endpoint],
-        [isNewInterface ? 'vlanNumberNewInterface' : 'vlanNumber']: value,
+        ...prev[endpoint],
+        vlanNumber: isDuplicate ? true : prev[endpoint].vlanNumber
       }
     }));
+    
+    // Only update the state if there's no duplicate
+    if (!isDuplicate) {
+      dispatch(updateTechnicalFeasibility({
+        [endpoint]: {
+          ...technicalData[endpoint],
+          [isNewInterface ? 'vlanNumberNewInterface' : 'vlanNumber']: value,
+        }
+      }));
+    }
   };
 
   // Update the interface type in quote data model based on l2_capacity_max
-  function updateInterfaceType(data: any, endpoint: 'endA' | 'endB') {
+  function updateInterfaceType(data: EndpointDetails, endpoint: 'endA' | 'endB') {
     const endpointData = data;
     const l2CapacityMax = parseInt(endpointData?.l2_capacity_max || '0') >= 10000 ? 10 : 1;
     const interfaceType = l2CapacityMax === 1 ? 'GigabitEthernet' : 'TenGigabitEthernet';
@@ -695,7 +733,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
                     size="small"
                     sx={{ width: 200 }}
                     error={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'existing'}
-                    helperText={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'existing' ? 'VLAN number is required' : ''}
+                    helperText={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'existing' ? 'VLAN number is required or duplicate' : ''}
                   />
                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
                     You can choose between 2 and 4094
@@ -761,7 +799,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
                     size="small"
                     sx={{ width: 200 }}
                     error={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'new'}
-                    helperText={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'new' ? 'VLAN number is required' : ''}
+                    helperText={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'new' ? 'VLAN number is required or duplicate' : ''}
                   />
                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
                     You can choose between 2 and 4094
@@ -906,7 +944,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
                     size="small"
                     sx={{ width: 200 }}
                     error={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'existing'}
-                    helperText={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'existing' ? 'VLAN number is required' : ''}
+                    helperText={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'existing' ? 'VLAN number is required or duplicate' : ''}
                   />
                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
                     You can choose between 2 and 4094
@@ -973,7 +1011,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
                     size="small"
                     sx={{ width: 200 }}
                     error={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'new'}
-                    helperText={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'new' ? 'VLAN number is required' : ''}
+                    helperText={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'new' ? 'VLAN number is required or duplicate' : ''}
                   />
                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
                     You can choose between 2 and 4094

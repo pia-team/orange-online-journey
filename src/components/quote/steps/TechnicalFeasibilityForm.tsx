@@ -615,7 +615,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
                   )}
                   <Box 
                     sx={{ 
-                      mb: 2,
+                      mt: 2,
                       p: 2,
                       border: errors.endA.interfaceSelection 
                         ? '2px solid red' 
@@ -625,7 +625,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
                       borderRadius: '4px',
                       cursor: 'pointer',
                       width: '100%',
-                      maxWidth: '400px',
+                      maxWidth: '250px',
                       backgroundColor: technicalData.endA?.selectedInterface === 'existing' ? 'rgba(255, 165, 0, 0.05)' : 'transparent',
                     }}
                     onClick={() => handleInterfaceSelection('endA', 'existing')}
@@ -827,14 +827,20 @@ const TechnicalFeasibilityForm: React.FC = () => {
               
               {endBStatus === 'succeeded' && (
                 <Box 
-                  sx={{ 
-                    mt: 2, 
-                    p: 2, 
-                    border: technicalData.endB.selectedInterface === 'existing' ? '2px solid orange' : '1px solid #e0e0e0',
-                    borderRadius: 1,
-                    cursor: 'pointer',
-                    backgroundColor: technicalData.endB.selectedInterface === 'existing' ? 'rgba(255, 165, 0, 0.05)' : 'transparent',
-                  }}
+                 sx={{ 
+                      mt: 2,
+                      p: 2,
+                      border: errors.endB.interfaceSelection 
+                        ? '2px solid red' 
+                        : technicalData.endB?.selectedInterface === 'existing' 
+                            ? '2px solid orange' 
+                            : '1px solid #e0e0e0',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      width: '100%',
+                      maxWidth: '250px',
+                      backgroundColor: technicalData.endB?.selectedInterface === 'existing' ? 'rgba(255, 165, 0, 0.05)' : 'transparent',
+                    }}
                   onClick={() => handleInterfaceSelection('endB', 'existing')}
                 >
                   <Typography variant="body2" fontWeight='bold'>

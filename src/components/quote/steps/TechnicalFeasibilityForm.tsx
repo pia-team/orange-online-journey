@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
@@ -17,7 +17,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { updateTechnicalFeasibility, selectTechnicalFeasibility, selectServiceNeeds } from '../../../features/quote/quoteFormSlice';
+import { updateTechnicalFeasibility, selectTechnicalFeasibility, selectServiceNeeds, setFormValidState } from '../../../features/quote/quoteFormSlice';
 import { 
   fetchEndAInterfaces, 
   fetchEndBInterfaces,
@@ -92,11 +92,12 @@ const CapacityBox = styled(Box)(({ theme }) => ({
   },
   '& .capacity-label': {
     fontSize: '12px',
-    color: theme.palette.text.secondary,
+    color: theme.palette.warning.main,
   }
 }));
 
-// BandwidthBox component styled for bandwidth display
+// BandwidthBox component styled for bandwidth display - commented out as currently unused
+/* 
 const BandwidthBox = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(3),
   padding: theme.spacing(2),
@@ -105,6 +106,7 @@ const BandwidthBox = styled(Box)(({ theme }) => ({
   borderTop: '1px solid #e0e0e0',
   borderBottom: '1px solid #e0e0e0',
 }));
+*/
 
 const TechnicalFeasibilityForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -115,6 +117,84 @@ const TechnicalFeasibilityForm: React.FC = () => {
   const endBInterfaces = useSelector(selectEndBInterfaces);
   const endAStatus = useSelector(selectEndAStatus);
   const endBStatus = useSelector(selectEndBStatus);
+
+  // State for form validation
+  const [showValidation, setShowValidation] = useState(false);
+  const [errors, setErrors] = useState({
+    endA: {
+      vlanNumber: false,
+      interfaceSelection: false
+    },
+    endB: {
+      vlanNumber: false,
+      interfaceSelection: false
+    }
+  });
+
+  // Auto-set validation display after user interacts with the form
+  useEffect(() => {
+    if (!showValidation && (
+      technicalData.endA.connectionMode === 'VLAN' || 
+      technicalData.endA.connectionModeNewInterface === 'VLAN' || 
+      technicalData.endB.connectionMode === 'VLAN' || 
+      technicalData.endB.connectionModeNewInterface === 'VLAN' ||
+      technicalData.endA.selectedInterface || 
+      technicalData.endB.selectedInterface
+    )) {
+      setShowValidation(true);
+    }
+  }, [technicalData, showValidation]);
+
+  // Form validation logic
+  useEffect(() => {
+    // Validate endA
+    const endAErrors = {
+      vlanNumber: technicalData.endA.connectionMode === 'VLAN' && 
+                 technicalData.endA.selectedInterface === 'existing' && 
+                 !technicalData.endA.vlanNumber && 
+                 showValidation,
+      vlanNumberNewInterface: technicalData.endA.connectionModeNewInterface === 'VLAN' && 
+                            technicalData.endA.selectedInterface === 'new' && 
+                            !technicalData.endA.vlanNumberNewInterface && 
+                            showValidation,
+      interfaceSelection: !technicalData.endA.selectedInterface && showValidation
+    };
+
+    // Validate endB
+    const endBErrors = {
+      vlanNumber: technicalData.endB.connectionMode === 'VLAN' && 
+                 technicalData.endB.selectedInterface === 'existing' && 
+                 !technicalData.endB.vlanNumber && 
+                 showValidation,
+      vlanNumberNewInterface: technicalData.endB.connectionModeNewInterface === 'VLAN' && 
+                            technicalData.endB.selectedInterface === 'new' && 
+                            !technicalData.endB.vlanNumberNewInterface && 
+                            showValidation,
+      interfaceSelection: !technicalData.endB.selectedInterface && showValidation
+    };
+
+    setErrors({
+      endA: {
+        vlanNumber: endAErrors.vlanNumber || endAErrors.vlanNumberNewInterface,
+        interfaceSelection: endAErrors.interfaceSelection
+      },
+      endB: {
+        vlanNumber: endBErrors.vlanNumber || endBErrors.vlanNumberNewInterface,
+        interfaceSelection: endBErrors.interfaceSelection
+      }
+    });
+
+    // Determine overall form validity
+    const isEndAValid = !(endAErrors.vlanNumber || endAErrors.vlanNumberNewInterface || endAErrors.interfaceSelection);
+    const isEndBValid = !(endBErrors.vlanNumber || endBErrors.vlanNumberNewInterface || endBErrors.interfaceSelection);
+    const isFormValid = isEndAValid && isEndBValid;
+
+    // Update form validation state in Redux
+    dispatch(setFormValidState({
+      step: 1, // Technical Feasibility is step 1
+      isValid: isFormValid
+    }));
+  }, [technicalData, showValidation, dispatch]);
   
   useEffect(() => {
     if (serviceNeeds.endALocation?.id) {
@@ -342,7 +422,16 @@ const TechnicalFeasibilityForm: React.FC = () => {
     }));
   };
 
-  const handleVlanNumberChange = (endpoint: 'endA' | 'endB', value: string, isNewInterface: boolean = false) => {
+  const handleInterfaceSelection = (endpoint: 'endA' | 'endB', selection: 'existing' | 'new') => {
+    dispatch(updateTechnicalFeasibility({
+      [endpoint]: {
+        ...technicalData[endpoint],
+        selectedInterface: selection,
+      }
+    }));
+  };
+
+  const handleVlanNumberChange = (endpoint: 'endA' | 'endB', value: string, isNewInterface = false) => {
     dispatch(updateTechnicalFeasibility({
       [endpoint]: {
         ...technicalData[endpoint],
@@ -352,7 +441,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
   };
 
   // Update the interface type in quote data model based on l2_capacity_max
-  function updateInterfaceType(data?: any, endpoint: 'endA' | 'endB') {
+  function updateInterfaceType(data: any, endpoint: 'endA' | 'endB') {
     const endpointData = data;
     const l2CapacityMax = parseInt(endpointData?.l2_capacity_max || '0') >= 10000 ? 10 : 1;
     const interfaceType = l2CapacityMax === 1 ? 'GigabitEthernet' : 'TenGigabitEthernet';
@@ -518,16 +607,39 @@ const TechnicalFeasibilityForm: React.FC = () => {
               )}
               
               {endAStatus === 'succeeded' && (
-                <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-                  <Typography variant="body2" fontWeight='bold'>
-                    {technicalData.endA.interface || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2">
-                    {technicalData.endA.router || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2">
-                    {`${parseInt(technicalData.endA.bw_avail || '0') / 100}Gbps / ${parseInt(technicalData.endA.bw_max || '0') /100}Gbps`}
-                  </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {errors.endA.interfaceSelection && (
+                    <Typography variant="subtitle2" color="error">
+                      Please select either an existing interface or a new interface
+                    </Typography>
+                  )}
+                  <Box 
+                    sx={{ 
+                      mb: 2,
+                      p: 2,
+                      border: errors.endA.interfaceSelection 
+                        ? '2px solid red' 
+                        : technicalData.endA?.selectedInterface === 'existing' 
+                            ? '2px solid orange' 
+                            : '1px solid #e0e0e0',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      width: '100%',
+                      maxWidth: '400px',
+                      backgroundColor: technicalData.endA?.selectedInterface === 'existing' ? 'rgba(255, 165, 0, 0.05)' : 'transparent',
+                    }}
+                    onClick={() => handleInterfaceSelection('endA', 'existing')}
+                  >
+                    <Typography variant="body2" fontWeight='bold'>
+                      {technicalData.endA.interface || 'N/A'}
+                    </Typography>
+                    <Typography variant="body2">
+                      {technicalData.endA.router || 'N/A'}
+                    </Typography>
+                    <Typography variant="body2">
+                      {`${parseInt(technicalData.endA.bw_avail || '0') / 100}Gbps / ${parseInt(technicalData.endA.bw_max || '0') /100}Gbps`}
+                    </Typography>
+                  </Box>
                 </Box>
               )}
 
@@ -578,10 +690,12 @@ const TechnicalFeasibilityForm: React.FC = () => {
                   <TextField
                     id="vlan-number-a"
                     variant="outlined"
-                    value={technicalData.endA?.vlanNumber}
+                    value={technicalData.endA.vlanNumber}
                     onChange={(e) => handleVlanNumberChange('endA', e.target.value)}
                     size="small"
                     sx={{ width: 200 }}
+                    error={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'existing'}
+                    helperText={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'existing' ? 'VLAN number is required' : ''}
                   />
                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
                     You can choose between 2 and 4094
@@ -591,7 +705,16 @@ const TechnicalFeasibilityForm: React.FC = () => {
               
               <Box sx={{ mt: 3 }}>  
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                  <CapacityBox sx={{ mb: 2 }}>
+                  <CapacityBox 
+                    sx={{ 
+                      mb: 2,
+                      border: technicalData.endA.selectedInterface === 'new' ? '2px solid orange' : '1px solid #e0e0e0',
+                      cursor: 'pointer',
+                      backgroundColor: technicalData.endA.selectedInterface === 'new' ? 'rgba(255, 165, 0, 0.05)' : 'transparent',
+                    }}
+                    onClick={() => handleInterfaceSelection('endA', 'new')}
+                  >
+                    <div className="capacity-label">Capacity</div>
                     <div className="capacity-value">
                       {technicalData.endA?.l2_capacity_max_value_display} Gbps
                     </div>
@@ -637,6 +760,8 @@ const TechnicalFeasibilityForm: React.FC = () => {
                     onChange={(e) => handleVlanNumberChange('endA', e.target.value, true)}
                     size="small"
                     sx={{ width: 200 }}
+                    error={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'new'}
+                    helperText={errors.endA.vlanNumber && technicalData.endA.selectedInterface === 'new' ? 'VLAN number is required' : ''}
                   />
                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
                     You can choose between 2 and 4094
@@ -701,7 +826,17 @@ const TechnicalFeasibilityForm: React.FC = () => {
               )}
               
               {endBStatus === 'succeeded' && (
-                <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                <Box 
+                  sx={{ 
+                    mt: 2, 
+                    p: 2, 
+                    border: technicalData.endB.selectedInterface === 'existing' ? '2px solid orange' : '1px solid #e0e0e0',
+                    borderRadius: 1,
+                    cursor: 'pointer',
+                    backgroundColor: technicalData.endB.selectedInterface === 'existing' ? 'rgba(255, 165, 0, 0.05)' : 'transparent',
+                  }}
+                  onClick={() => handleInterfaceSelection('endB', 'existing')}
+                >
                   <Typography variant="body2" fontWeight='bold'>
                     {technicalData.endB.interface || 'N/A'}
                   </Typography>
@@ -764,6 +899,8 @@ const TechnicalFeasibilityForm: React.FC = () => {
                     onChange={(e) => handleVlanNumberChange('endB', e.target.value)}
                     size="small"
                     sx={{ width: 200 }}
+                    error={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'existing'}
+                    helperText={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'existing' ? 'VLAN number is required' : ''}
                   />
                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
                     You can choose between 2 and 4094
@@ -773,7 +910,16 @@ const TechnicalFeasibilityForm: React.FC = () => {
               
               <Box sx={{ mt: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                  <CapacityBox sx={{ mb: 2 }}>
+                  <CapacityBox 
+                    sx={{ 
+                      mb: 2,
+                      border: technicalData.endB.selectedInterface === 'new' ? '2px solid orange' : '1px solid #e0e0e0',
+                      cursor: 'pointer',
+                      backgroundColor: technicalData.endB.selectedInterface === 'new' ? 'rgba(255, 165, 0, 0.05)' : 'transparent',
+                    }}
+                    onClick={() => handleInterfaceSelection('endB', 'new')}
+                  >
+                    <div className="capacity-label">Capacity</div>
                     <div className="capacity-value">
                       {technicalData.endB?.l2_capacity_max_value_display} Gbps
                     </div>
@@ -820,6 +966,8 @@ const TechnicalFeasibilityForm: React.FC = () => {
                     onChange={(e) => handleVlanNumberChange('endB', e.target.value, true)}
                     size="small"
                     sx={{ width: 200 }}
+                    error={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'new'}
+                    helperText={errors.endB.vlanNumber && technicalData.endB.selectedInterface === 'new' ? 'VLAN number is required' : ''}
                   />
                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
                     You can choose between 2 and 4094

@@ -78,6 +78,7 @@ interface EndpointDetails {
   l2_capacity_max_display: string;
   l2_capacity_max: string;
   l3_capacity_max: string;
+  selectedInterface: 'existing' | 'new';
   place: {
     address: string;
     city: string;
@@ -194,6 +195,7 @@ const initialState: QuoteFormState = {
       vlanNumber: '',
       crossConnect: false,
       capacity: '',
+      selectedInterface: 'existing',
       place: {
         address: '',
         city: '',
@@ -223,6 +225,7 @@ const initialState: QuoteFormState = {
       vlanNumber: '',
       crossConnect: true,
       capacity: '',
+      selectedInterface: 'existing',
       place: {
         address: '',
         city: '',
@@ -398,7 +401,7 @@ const quoteFormSlice = createSlice({
               id: endA.id || '',
               href: '',
               name: endA.name || '',
-              description: endA.description || '',
+              // No description field in GeographicAddress type
               status: '',
               code: '',
               place: [],
@@ -413,7 +416,7 @@ const quoteFormSlice = createSlice({
               id: endB.id || '',
               href: endB.href|| '',
               name: endB.name || '',
-              description: endB.description || '',
+              // No description field in GeographicAddress type
               status: '',
               code: '',
               place: [],

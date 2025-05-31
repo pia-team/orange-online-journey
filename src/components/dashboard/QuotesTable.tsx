@@ -45,7 +45,6 @@ const QuotesTable: React.FC<QuotesTableProps> = ({ quotes }) => {
   };
 
   const handleAddNewProduct = () => {
-    console.log('Add new product for quote:', selectedQuote);
   };
 
   return (

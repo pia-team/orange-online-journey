@@ -277,7 +277,6 @@ const QuoteList: React.FC = () => {
   }, []);
 
   const handleViewDetail = (quote: Quote) => {
-    console.log('View detail for quote:', quote);
     setSelectedQuote(quote);
     setProducts(mockProducts);
     setSidebarOpen(true);
@@ -288,11 +287,9 @@ const QuoteList: React.FC = () => {
   };
 
   const handleAddNewProduct = () => {
-    console.log('Add new product');
   };
 
   const handleCreateQuote = () => {
-    console.log('Create new quote');
   };
 
   const getStatusChipColor = (status: string) => {

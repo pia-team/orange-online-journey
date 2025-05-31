@@ -19,14 +19,12 @@ const keycloakInitOptions = {
 };
 
 const onKeycloakEvent = (event: string, error: unknown) => {
-  console.log('onKeycloakEvent', event, error);
   
   // Login başarılı olduğunda müşteri bilgilerini getir
   if (event === 'onAuthSuccess') {
     const customerId = keycloak.tokenParsed?.Customer_ID;
     if (customerId) {
       store.dispatch(fetchCustomerAsync({ customerId }));
-      console.log('Fetching customer data for ID:', customerId);
     } else {
       console.warn('No customer ID found in token after login');
     }
@@ -34,7 +32,6 @@ const onKeycloakEvent = (event: string, error: unknown) => {
 };
 
 const onKeycloakTokens = (tokens: { token?: string }) => {
-  console.log('onKeycloakTokens', tokens);
   // if (tokens.token) {
   //   localStorage.setItem('kc_token', tokens.token);
   // }

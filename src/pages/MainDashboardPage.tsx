@@ -43,7 +43,6 @@ const MainDashboardPage: React.FC = () => {
 
 
   const handleViewDetails = (quoteId: string) => {
-    console.log(`View details for quote: ${quoteId}`);
   };
 
   const handlePageChange = (newPage: number) => {

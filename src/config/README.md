@@ -17,8 +17,7 @@ All environment variables are accessed through the `env` object:
 ```typescript
 import { env } from '../config';
 
-console.log(env.apiBaseUrl);
-console.log(env.isProduction);
+
 ```
 
 ### API Endpoints

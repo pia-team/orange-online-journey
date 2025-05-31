@@ -64,6 +64,7 @@ interface EndpointDetails {
   location: string;
   interfaceDetails: TechnicalInterfaceDetails;
   connectionMode: 'VLAN' | 'PORT';
+  connectionModeNew: 'VLAN' | 'PORT';
   connectionModeNewInterface: 'VLAN' | 'PORT';
   vlanNumber: string;
   vlanNumberNewInterface: string;
@@ -73,6 +74,8 @@ interface EndpointDetails {
   router: string;
   bw_avail: string;
   bw_max: string;
+  l2_capacity_max_value_display: string;
+  l2_capacity_max_display: string;
   l2_capacity_max: string;
   l3_capacity_max: string;
   place: {
@@ -176,6 +179,8 @@ const initialState: QuoteFormState = {
       bw_max: '',
       l2_capacity_max: '',
       l3_capacity_max: '',
+      l2_capacity_max_value_display: '',
+      l2_capacity_max_display: '',
       interfaceDetails: {
         interfaceId: '',
         portType: '',
@@ -184,6 +189,7 @@ const initialState: QuoteFormState = {
       },
       connectionModeNewInterface: 'PORT',
       connectionMode: 'PORT',
+      connectionModeNew: 'PORT',
       vlanNumberNewInterface: '',
       vlanNumber: '',
       crossConnect: false,
@@ -201,6 +207,8 @@ const initialState: QuoteFormState = {
       bw_avail: '',
       bw_max: '',
       l2_capacity_max: '',
+      l2_capacity_max_value_display: '',
+      l2_capacity_max_display: '',
       l3_capacity_max: '',
       interfaceDetails: {
         interfaceId: '',
@@ -210,6 +218,7 @@ const initialState: QuoteFormState = {
       },
       connectionModeNewInterface: 'PORT',
       connectionMode: 'PORT',
+      connectionModeNew: 'PORT',
       vlanNumberNewInterface: '',
       vlanNumber: '',
       crossConnect: true,

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
@@ -140,10 +140,9 @@ const TechnicalFeasibilityForm: React.FC = () => {
         service_type: 'L2VPN',
         origin: 'DNEXT'
       }));
-
       const place = serviceNeeds.endALocation.place?.[0] || {};
-      dispatch(updateTechnicalFeasibility({
-        endA: {
+
+        const endA=  {
           ...technicalData.endA,
           location: serviceNeeds.endALocation.name,
           place: {
@@ -152,7 +151,8 @@ const TechnicalFeasibilityForm: React.FC = () => {
             country: place.country || ''
           }
         }
-      }));
+        console.log(endA);
+      updateInterfaceType(endA, 'endA');
     }
   }, [dispatch, serviceNeeds.endALocation]);
   
@@ -197,10 +197,9 @@ const TechnicalFeasibilityForm: React.FC = () => {
             characteristics[char.name] = char.value;
           }
         });
-        
         // Update technicalFeasibility form with mapped characteristics
-        dispatch(updateTechnicalFeasibility({
-          endA: {
+        
+        const endA = {
             ...technicalData.endA,
             connectionMode: characteristics['vlan_id'].split(',')[0] ? 'VLAN' : 'PORT',
             vlanNumber: characteristics['vlan_id'].split(',')[0] || technicalData.endA.vlanNumber,
@@ -214,7 +213,8 @@ const TechnicalFeasibilityForm: React.FC = () => {
             vlanNumberNewInterface: characteristics['vlan_id'].split(',')[1] || technicalData.endA.vlanNumberNewInterface,
             // Update other fields as needed
           }
-        }));
+          console.log(endA);
+        updateInterfaceType(endA, 'endA');
       }
     }
   }, [endAInterfaces, dispatch]);
@@ -243,10 +243,9 @@ const TechnicalFeasibilityForm: React.FC = () => {
         service_type: 'L2VPN',
         origin: 'DNEXT'
       }));
-      
       const place = serviceNeeds.endBLocation.place?.[0] || {};
-      dispatch(updateTechnicalFeasibility({
-        endB: {
+    
+       const endB = {
           ...technicalData.endB,
           location: serviceNeeds.endBLocation.name,
           place: {
@@ -255,7 +254,9 @@ const TechnicalFeasibilityForm: React.FC = () => {
             country: place.country || ''
           }
         }
-      }));
+  
+      updateInterfaceType(endB, 'endB');
+
     }
   }, [dispatch, serviceNeeds.endBLocation]);
   
@@ -302,10 +303,9 @@ const TechnicalFeasibilityForm: React.FC = () => {
             characteristics[char.name] = char.value;
           }
         });
-        
         // Update technicalFeasibility form with mapped characteristics
-        dispatch(updateTechnicalFeasibility({
-          endB: {
+       
+           const endB = {
             ...technicalData.endB,
             connectionMode: characteristics['vlan_id'].split(',')[0] ? 'VLAN' : 'PORT',
             vlanNumber: characteristics['vlan_id'].split(',')[0] || technicalData.endB.vlanNumber,
@@ -318,16 +318,17 @@ const TechnicalFeasibilityForm: React.FC = () => {
             connectionModeNewInterface: characteristics['vlan_id'].split(',')[1] ? 'VLAN' : 'PORT',
             vlanNumberNewInterface: characteristics['vlan_id'].split(',')[1] || technicalData.endB.vlanNumberNewInterface,
           }
-        }));
+       
+        updateInterfaceType(endB, 'endB');
       }
     }
   }, [endBInterfaces, dispatch]);
 
-  const handleConnectionModeChange = (endpoint: 'endA' | 'endB', mode: 'VLAN' | 'PORT') => {
+  const handleConnectionModeChange = (endpoint: 'endA' | 'endB', mode: 'VLAN' | 'PORT', isNewInterface: boolean = false) => {
     dispatch(updateTechnicalFeasibility({
       [endpoint]: {
         ...technicalData[endpoint],
-        connectionMode: mode,
+        [isNewInterface ? 'connectionModeNewInterface' : 'connectionMode']: mode,
       }
     }));
   };
@@ -341,15 +342,35 @@ const TechnicalFeasibilityForm: React.FC = () => {
     }));
   };
 
-  const handleVlanNumberChange = (endpoint: 'endA' | 'endB', value: string) => {
+  const handleVlanNumberChange = (endpoint: 'endA' | 'endB', value: string, isNewInterface: boolean = false) => {
     dispatch(updateTechnicalFeasibility({
       [endpoint]: {
         ...technicalData[endpoint],
-        vlanNumber: value,
+        [isNewInterface ? 'vlanNumberNewInterface' : 'vlanNumber']: value,
       }
     }));
   };
-  
+
+  // Update the interface type in quote data model based on l2_capacity_max
+  function updateInterfaceType(data?: any, endpoint: 'endA' | 'endB') {
+    const endpointData = data;
+    const l2CapacityMax = parseInt(endpointData?.l2_capacity_max || '0') >= 10000 ? 10 : 1;
+    const interfaceType = l2CapacityMax === 1 ? 'GigabitEthernet' : 'TenGigabitEthernet';
+
+    // Store the interface type in the quote data model while preserving all existing data
+    // Using 'intfType' as the new field name for PointX_IntfType
+    dispatch(updateTechnicalFeasibility({
+      [endpoint]: {
+        ...data, // Preserve all existing data
+        l2_capacity_max_value_display: l2CapacityMax,
+        l2_capacity_max_display: interfaceType,
+        intfType: interfaceType
+      }
+    }));
+
+    return interfaceType;
+  }
+
   return (
     <Box>
       <Typography variant="h4" component="h1" sx={{ mb: 3, fontWeight: 'normal' }}>
@@ -568,27 +589,30 @@ const TechnicalFeasibilityForm: React.FC = () => {
                 </Box>
               )}
               
-              <Box sx={{ mt: 3 }}>
-                <CapacityBox>
-                  <div className="capacity-value">{technicalData.endA?.capacity}</div>
-                  <div className="capacity-label">New TechSpecialBeam®</div>
-                </CapacityBox>
-                
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={technicalData.endA?.crossConnect}
-                      onChange={(e) => handleCrossConnectChange('endA', e.target.checked)}
-                      sx={{ color: 'orange', '&.Mui-checked': { color: 'orange' } }}
-                    />
-                  }
-                  label="Add Cross-Connect Option"
-                  sx={{ mt: 2 }}
-                />
+              <Box sx={{ mt: 3 }}>  
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                  <CapacityBox sx={{ mb: 2 }}>
+                    <div className="capacity-value">
+                      {technicalData.endA?.l2_capacity_max_value_display} Gbps
+                    </div>
+                    <div className="capacity-label">{`New ${technicalData.endA?.l2_capacity_max_display}`}</div>
+                  </CapacityBox>
+                  
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={technicalData.endA?.crossConnect}
+                        onChange={(e) => handleCrossConnectChange('endA', e.target.checked)}
+                        sx={{ color: 'orange', '&.Mui-checked': { color: 'orange' } }}
+                      />
+                    }
+                    label="Add Cross-Connect Option"
+                  />
+                </Box>
                 <FormControl>
                 <RadioGroup
                   value={technicalData.endA.connectionModeNewInterface}
-                  onChange={(e) => handleConnectionModeChange('endA', e.target.value as 'VLAN' | 'PORT')}
+                  onChange={(e) => handleConnectionModeChange('endA', e.target.value as 'VLAN' | 'PORT', true)}
                   row
                 >
                   <FormControlLabel
@@ -610,7 +634,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
                     id="vlan-number-new-a"
                     variant="outlined"
                     value={technicalData.endA?.vlanNumberNewInterface}
-                    onChange={(e) => handleVlanNumberChange('endA', e.target.value)}
+                    onChange={(e) => handleVlanNumberChange('endA', e.target.value, true)}
                     size="small"
                     sx={{ width: 200 }}
                   />
@@ -748,22 +772,60 @@ const TechnicalFeasibilityForm: React.FC = () => {
               )}
               
               <Box sx={{ mt: 3 }}>
-                <CapacityBox>
-                  <div className="capacity-value">{technicalData.endB.capacity}</div>
-                  <div className="capacity-label">New TechSpecialBeam®</div>
-                </CapacityBox>
-                
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={technicalData.endB.crossConnect}
-                      onChange={(e) => handleCrossConnectChange('endB', e.target.checked)}
-                      sx={{ color: 'orange', '&.Mui-checked': { color: 'orange' } }}
-                    />
-                  }
-                  label="Add Cross-Connect Option"
-                  sx={{ mt: 2 }}
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                  <CapacityBox sx={{ mb: 2 }}>
+                    <div className="capacity-value">
+                      {technicalData.endB?.l2_capacity_max_value_display} Gbps
+                    </div>
+                    <div className="capacity-label">{`New ${technicalData.endB?.l2_capacity_max_display}`}</div>
+                  </CapacityBox>
+                  
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={technicalData.endB.crossConnect}
+                        onChange={(e) => handleCrossConnectChange('endB', e.target.checked)}
+                        sx={{ color: 'orange', '&.Mui-checked': { color: 'orange' } }}
+                      />
+                    }
+                    label="Add Cross-Connect Option"
+                  />
+                </Box>
+
+                <FormControl>
+                <RadioGroup
+                  value={technicalData.endB.connectionModeNewInterface}
+                  onChange={(e) => handleConnectionModeChange('endB', e.target.value as 'VLAN' | 'PORT', true)}
+                  row
+                >
+                  <FormControlLabel
+                    value="VLAN"
+                    control={<Radio sx={{ color: 'orange', '&.Mui-checked': { color: 'orange' } }} />}
+                    label="VLAN Mode"
+                  />
+                  <FormControlLabel
+                    value="PORT"
+                    control={<Radio sx={{ color: 'orange', '&.Mui-checked': { color: 'orange' } }} />}
+                    label="Port Mode"
+                  />
+                </RadioGroup>
+              </FormControl>
+                   {technicalData.endB.connectionModeNewInterface === 'VLAN' && (
+                <Box sx={{ mt: 2 }}>
+                  <InputLabel htmlFor="vlan-number-new-b">VLAN number</InputLabel>
+                  <TextField
+                    id="vlan-number-new-b"
+                    variant="outlined"
+                    value={technicalData.endB?.vlanNumberNewInterface}
+                    onChange={(e) => handleVlanNumberChange('endB', e.target.value, true)}
+                    size="small"
+                    sx={{ width: 200 }}
+                  />
+                  <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                    You can choose between 2 and 4094
+                  </Typography>
+                </Box>
+              )}
               </Box>
             </Box>
           </EndpointSection>

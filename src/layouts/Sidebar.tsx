@@ -217,7 +217,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 '&:hover': {
                   color: location.pathname === item.path ? 'common.white' : orange[500],
                 },
-                color: 'white !important',
               }}
             >
               {item.icon}
@@ -258,7 +257,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               minWidth: 0,
               mr: isEffectivelyOpen ? 3 : 'auto',
               justifyContent: 'center',
-              color: 'text.secondary',
               transition: theme.transitions.create('margin', {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.enteringScreen,

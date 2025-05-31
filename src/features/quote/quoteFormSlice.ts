@@ -64,9 +64,17 @@ interface EndpointDetails {
   location: string;
   interfaceDetails: TechnicalInterfaceDetails;
   connectionMode: 'VLAN' | 'PORT';
-  vlanNumber?: string;
+  connectionModeNewInterface: 'VLAN' | 'PORT';
+  vlanNumber: string;
+  vlanNumberNewInterface: string;
   crossConnect: boolean;
   capacity: string;
+  interface: string;
+  router: string;
+  bw_avail: string;
+  bw_max: string;
+  l2_capacity_max: string;
+  l3_capacity_max: string;
   place: {
     address: string;
     city: string;
@@ -161,39 +169,55 @@ const initialState: QuoteFormState = {
   },
   technicalFeasibility: {
     endA: {
-      location: 'Paris 03 / Paris Lab 3',
+      location: '',
+      interface: '',
+      router: '',
+      bw_avail: '',
+      bw_max: '',
+      l2_capacity_max: '',
+      l3_capacity_max: '',
       interfaceDetails: {
-        interfaceId: 'TenGigE0/0/0/0/12',
-        portType: 'MPPCR1',
-        availability: '9.992Gbps/10Gbps',
-        speed: '10 Gbps',
+        interfaceId: '',
+        portType: '',
+        availability: '',
+        speed: '',
       },
-      connectionMode: 'VLAN',
-      vlanNumber: '23',
+      connectionModeNewInterface: 'PORT',
+      connectionMode: 'PORT',
+      vlanNumberNewInterface: '',
+      vlanNumber: '',
       crossConnect: false,
-      capacity: '10 Gbps',
+      capacity: '',
       place: {
-        address: '60 RUE DES ARCHIVES',
-        city: '75003 PARIS 03',
-        country: 'FRANCE',
+        address: '',
+        city: '',
+        country: '',
       },
     },
     endB: {
-      location: 'Abidjan / Paris Lab 1',
+      location: '',
+      interface: '',
+      router: '',
+      bw_avail: '',
+      bw_max: '',
+      l2_capacity_max: '',
+      l3_capacity_max: '',
       interfaceDetails: {
-        interfaceId: 'TenGigE0/0/3/0/41',
-        portType: 'MPPR4',
-        availability: '9.704Gbps/10Gbps',
-        speed: '10 Gbps',
+        interfaceId: '',
+        portType: '',
+        availability: '',
+        speed: '',
       },
+      connectionModeNewInterface: 'PORT',
       connectionMode: 'PORT',
-      vlanNumber: '3',
+      vlanNumberNewInterface: '',
+      vlanNumber: '',
       crossConnect: true,
-      capacity: '10 Gbps',
+      capacity: '',
       place: {
-        address: '17 RUE LECOEUR',
-        city: 'ABIDJAN',
-        country: 'IVORY COAST',
+        address: '',
+        city: '',
+        country: '',
       },
     },
   },

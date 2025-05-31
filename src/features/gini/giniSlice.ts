@@ -21,6 +21,8 @@ interface GiniApiParams {
   pop_id: string;
   service_type: string;
   origin: string;
+  type_intf?: string;
+  bw_service?: string;
 }
 
 interface ApiError {
@@ -32,12 +34,12 @@ interface ApiError {
 
 interface GiniState {
   endA: {
-    interfaces: GiniInterface[];
+    interfaces: any;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
   };
   endB: {
-    interfaces: GiniInterface[];
+    interfaces: any;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
   };
@@ -72,40 +74,29 @@ export const fetchEndAInterfaces = createAsyncThunk(
       const code_rce = selectCustomerCodeRCE(state) || params.code_rce;
       
       // İstenen JSON formatına göre istek gövdesi oluştur
+      const baseCharacteristics = [
+        { name: "code_rce", value: code_rce },
+        { name: "number_intf", value: params.number_intf.toString() },
+        { name: "pop_id", value: params.pop_id },
+        { name: "service_type", value: params.service_type },
+        { name: "origin", value: params.origin },
+        params.type_intf && { name: "type_intf", value: params.type_intf },
+        params.bw_service && { name: "bw_service", value: params.bw_service }
+      ].filter(Boolean);
+      
       const requestBody = {
         serviceQualificationItem: [
           {
-            id: "1",
             service: {
-              serviceCharacteristic: [
-                {
-                  name: "code_rce",
-                  value: code_rce
-                },
-                {
-                  name: "number_intf",
-                  value: params.number_intf.toString()
-                },
-                {
-                  name: "pop_id",
-                  value: params.pop_id
-                },
-                {
-                  name: "service_type",
-                  value: params.service_type
-                },
-                {
-                  name: "origin",
-                  value: params.origin
-                }
-              ]
+              serviceCharacteristic: baseCharacteristics
             }
           }
         ]
       };
       
+      
       const response = await axiosInstance.post(api.gini.CHECK_CUSTOMER_INTERFACE, requestBody);
-      return Array.isArray(response.data) ? response.data : [];
+      return response.data.serviceQualificationItem || [];
     } catch (error) {
       return handleAuth401Error(error as ApiError);
     }
@@ -121,39 +112,28 @@ export const fetchEndBInterfaces = createAsyncThunk(
       const code_rce = selectCustomerCodeRCE(state) || params.code_rce;
       
       // İstenen JSON formatına göre istek gövdesi oluştur
+      const baseCharacteristics = [
+        { name: "code_rce", value: code_rce },
+        { name: "number_intf", value: params.number_intf.toString() },
+        { name: "pop_id", value: params.pop_id },
+        { name: "service_type", value: params.service_type },
+        { name: "origin", value: params.origin },
+        params.type_intf && { name: "type_intf", value: params.type_intf },
+        params.bw_service && { name: "bw_service", value: params.bw_service }
+      ].filter(Boolean);
+      
       const requestBody = {
         serviceQualificationItem: [
           {
             service: {
-              serviceCharacteristic: [
-                {
-                  name: "code_rce",
-                  value: code_rce
-                },
-                {
-                  name: "number_intf",
-                  value: params.number_intf.toString()
-                },
-                {
-                  name: "pop_id",
-                  value: params.pop_id
-                },
-                {
-                  name: "service_type",
-                  value: params.service_type
-                },
-                {
-                  name: "origin",
-                  value: params.origin
-                }
-              ]
+              serviceCharacteristic: baseCharacteristics
             }
           }
         ]
       };
       
       const response = await axiosInstance.post(api.gini.CHECK_CUSTOMER_INTERFACE, requestBody);
-      return Array.isArray(response.data) ? response.data : [];
+      return response.data.serviceQualificationItem || [];
     } catch (error) {
       return handleAuth401Error(error as ApiError);
     }
@@ -181,7 +161,7 @@ const giniSlice = createSlice({
       })
       .addCase(fetchEndAInterfaces.fulfilled, (state, action) => {
         state.endA.status = 'succeeded';
-        state.endA.interfaces = action.payload;
+        state.endA.interfaces = [...state.endA.interfaces, action.payload[0]];
       })
       .addCase(fetchEndAInterfaces.rejected, (state, action) => {
         state.endA.status = 'failed';
@@ -194,7 +174,7 @@ const giniSlice = createSlice({
       })
       .addCase(fetchEndBInterfaces.fulfilled, (state, action) => {
         state.endB.status = 'succeeded';
-        state.endB.interfaces = action.payload;
+        state.endB.interfaces = [...state.endB.interfaces, action.payload[0]];
       })
       .addCase(fetchEndBInterfaces.rejected, (state, action) => {
         state.endB.status = 'failed';

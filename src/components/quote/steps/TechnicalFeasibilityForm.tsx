@@ -29,6 +29,22 @@ import {
 import { selectCustomerCodeRCE } from '../../../features/customer/customerSelectors';
 import type { AppDispatch } from '../../../store';
 
+// Define interface for service characteristic
+interface ServiceCharacteristic {
+  name: string;
+  value: string;
+}
+
+// Define interface for service
+interface Service {
+  serviceCharacteristic: ServiceCharacteristic[];
+}
+
+// Define interface for service qualification item
+interface ServiceQualificationItem {
+  service: Service;
+}
+
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   marginBottom: theme.spacing(3),
@@ -80,6 +96,7 @@ const CapacityBox = styled(Box)(({ theme }) => ({
   }
 }));
 
+// BandwidthBox component styled for bandwidth display
 const BandwidthBox = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(3),
   padding: theme.spacing(2),
@@ -114,6 +131,16 @@ const TechnicalFeasibilityForm: React.FC = () => {
         origin: 'DNEXT'
       }));
 
+      dispatch(fetchEndAInterfaces({
+        code_rce: customerCodeRCE || 'xxx',
+        number_intf: 1,
+        pop_id: popId,
+        type_intf: '123123',
+        bw_service: '22222',
+        service_type: 'L2VPN',
+        origin: 'DNEXT'
+      }));
+
       const place = serviceNeeds.endALocation.place?.[0] || {};
       dispatch(updateTechnicalFeasibility({
         endA: {
@@ -129,6 +156,69 @@ const TechnicalFeasibilityForm: React.FC = () => {
     }
   }, [dispatch, serviceNeeds.endALocation]);
   
+  // Update technicalFeasibility form with endAInterfaces data when fetched
+  useEffect(() => {
+    if (endAInterfaces && endAInterfaces.length > 0) {
+      // Find the interface with number_intf value of '0'
+      const targetInterface = endAInterfaces.find((intf: ServiceQualificationItem) => 
+        intf?.service?.serviceCharacteristic?.find((char: ServiceCharacteristic) => 
+          char.name === 'number_intf' && char.value === '0'
+        )
+      );
+      const targetInterface2 = endAInterfaces.find((intf: ServiceQualificationItem) => 
+        intf?.service?.serviceCharacteristic?.find((char: ServiceCharacteristic) => 
+          char.name === 'number_intf' && char.value === '1'
+        )
+      );
+      
+      // Extract capacity characteristics from targetInterface2 (number_intf='1')
+      let l2CapacityMax = '';
+      let l3CapacityMax = '';
+      
+      if (targetInterface2 && targetInterface2.service && targetInterface2.service.serviceCharacteristic) {
+        const capacityCharacteristics: Record<string, string> = {};
+        
+        targetInterface2.service.serviceCharacteristic.forEach((char: ServiceCharacteristic) => {
+          if (char.name && char.value !== undefined) {
+            capacityCharacteristics[char.name] = char.value;
+          }
+        });
+        
+        l2CapacityMax = capacityCharacteristics['l2_capacity_max'] || '';
+        l3CapacityMax = capacityCharacteristics['l3_capacity_max'] || '';
+      }
+      
+      if (targetInterface && targetInterface.service && targetInterface.service.serviceCharacteristic) {
+        // Map characteristics to form fields
+        const characteristics: Record<string, string> = {};
+        
+        targetInterface.service.serviceCharacteristic.forEach((char: ServiceCharacteristic) => {
+          if (char.name && char.value !== undefined) {
+            characteristics[char.name] = char.value;
+          }
+        });
+        
+        // Update technicalFeasibility form with mapped characteristics
+        dispatch(updateTechnicalFeasibility({
+          endA: {
+            ...technicalData.endA,
+            connectionMode: characteristics['vlan_id'].split(',')[0] ? 'VLAN' : 'PORT',
+            vlanNumber: characteristics['vlan_id'].split(',')[0] || technicalData.endA.vlanNumber,
+            interface: characteristics['interface'] || technicalData.endA.interface,
+            router: characteristics['router'] || technicalData.endA.router,
+            bw_avail: characteristics['bw_avail'] || technicalData.endA.bw_avail,
+            bw_max: characteristics['bw_max'] || technicalData.endA.bw_max,
+            l2_capacity_max: l2CapacityMax || technicalData.endA.l2_capacity_max,
+            l3_capacity_max: l3CapacityMax || technicalData.endA.l3_capacity_max,
+            connectionModeNewInterface: characteristics['vlan_id'].split(',')[1] ? 'VLAN' : 'PORT',
+            vlanNumberNewInterface: characteristics['vlan_id'].split(',')[1] || technicalData.endA.vlanNumberNewInterface,
+            // Update other fields as needed
+          }
+        }));
+      }
+    }
+  }, [endAInterfaces, dispatch]);
+  
   useEffect(() => {
     if (serviceNeeds.endBLocation?.id) {
       // POP ID formatını düzenle
@@ -140,6 +230,16 @@ const TechnicalFeasibilityForm: React.FC = () => {
         code_rce: customerCodeRCE || 'xxx',
         number_intf: 0,
         pop_id: popId, 
+        service_type: 'L2VPN',
+        origin: 'DNEXT'
+      }));
+
+      dispatch(fetchEndBInterfaces({
+        code_rce: customerCodeRCE || 'xxx',
+        number_intf: 1,
+        pop_id: popId,
+        type_intf: '123123',
+        bw_service: '22222',
         service_type: 'L2VPN',
         origin: 'DNEXT'
       }));
@@ -158,6 +258,70 @@ const TechnicalFeasibilityForm: React.FC = () => {
       }));
     }
   }, [dispatch, serviceNeeds.endBLocation]);
+  
+  // Update technicalFeasibility form with endBInterfaces data when fetched
+  useEffect(() => {
+    if (endBInterfaces && endBInterfaces.length > 0) {
+      // Find the interface with number_intf value of '0'
+      const targetInterface = endBInterfaces.find((intf: ServiceQualificationItem) => 
+        intf?.service?.serviceCharacteristic?.find((char: ServiceCharacteristic) => 
+          char.name === 'number_intf' && char.value === '0'
+        )
+      );
+      
+      // Find the interface with number_intf value of '1' for capacity values
+      const targetInterface2 = endBInterfaces.find((intf: ServiceQualificationItem) => 
+        intf?.service?.serviceCharacteristic?.find((char: ServiceCharacteristic) => 
+          char.name === 'number_intf' && char.value === '1'
+        )
+      );
+      
+      // Extract capacity characteristics from targetInterface2 (number_intf='1')
+      let l2CapacityMax = '';
+      let l3CapacityMax = '';
+      
+      if (targetInterface2 && targetInterface2.service && targetInterface2.service.serviceCharacteristic) {
+        const capacityCharacteristics: Record<string, string> = {};
+        
+        targetInterface2.service.serviceCharacteristic.forEach((char: ServiceCharacteristic) => {
+          if (char.name && char.value !== undefined) {
+            capacityCharacteristics[char.name] = char.value;
+          }
+        });
+        
+        l2CapacityMax = capacityCharacteristics['l2_capacity_max'] || '';
+        l3CapacityMax = capacityCharacteristics['l3_capacity_max'] || '';
+      }
+      
+      if (targetInterface && targetInterface.service && targetInterface.service.serviceCharacteristic) {
+        // Map characteristics to form fields
+        const characteristics: Record<string, string> = {};
+        
+        targetInterface.service.serviceCharacteristic.forEach((char: ServiceCharacteristic) => {
+          if (char.name && char.value !== undefined) {
+            characteristics[char.name] = char.value;
+          }
+        });
+        
+        // Update technicalFeasibility form with mapped characteristics
+        dispatch(updateTechnicalFeasibility({
+          endB: {
+            ...technicalData.endB,
+            connectionMode: characteristics['vlan_id'].split(',')[0] ? 'VLAN' : 'PORT',
+            vlanNumber: characteristics['vlan_id'].split(',')[0] || technicalData.endB.vlanNumber,
+            interface: characteristics['interface'] || technicalData.endB.interface,
+            router: characteristics['router'] || technicalData.endB.router,
+            bw_avail: characteristics['bw_avail'] || technicalData.endB.bw_avail,
+            bw_max: characteristics['bw_max'] || technicalData.endB.bw_max,
+            l2_capacity_max: l2CapacityMax || technicalData.endB.l2_capacity_max,
+            l3_capacity_max: l3CapacityMax || technicalData.endB.l3_capacity_max,
+            connectionModeNewInterface: characteristics['vlan_id'].split(',')[1] ? 'VLAN' : 'PORT',
+            vlanNumberNewInterface: characteristics['vlan_id'].split(',')[1] || technicalData.endB.vlanNumberNewInterface,
+          }
+        }));
+      }
+    }
+  }, [endBInterfaces, dispatch]);
 
   const handleConnectionModeChange = (endpoint: 'endA' | 'endB', mode: 'VLAN' | 'PORT') => {
     dispatch(updateTechnicalFeasibility({
@@ -185,7 +349,7 @@ const TechnicalFeasibilityForm: React.FC = () => {
       }
     }));
   };
-
+  
   return (
     <Box>
       <Typography variant="h4" component="h1" sx={{ mb: 3, fontWeight: 'normal' }}>
@@ -332,19 +496,20 @@ const TechnicalFeasibilityForm: React.FC = () => {
                 </Box>
               )}
               
-              {endAStatus === 'succeeded' && endAInterfaces.map((intf) => (
-                <Box key={intf.id} sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+              {endAStatus === 'succeeded' && (
+                <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
                   <Typography variant="body2" fontWeight='bold'>
-                    {intf.name || 'Interface ' + intf.id}
+                    {technicalData.endA.interface || 'N/A'}
                   </Typography>
                   <Typography variant="body2">
-                    Type: {intf.interface_type || 'Not specified'}
+                    {technicalData.endA.router || 'N/A'}
                   </Typography>
                   <Typography variant="body2">
-                    Availability: {intf.availability || 'Unknown'}
+                    {`${parseInt(technicalData.endA.bw_avail || '0') / 100}Gbps / ${parseInt(technicalData.endA.bw_max || '0') /100}Gbps`}
                   </Typography>
                 </Box>
-              ))}
+              )}
+
               
               {/* Fall back to static data if needed */}
               {endAStatus !== 'loading' && endAStatus !== 'succeeded' && (
@@ -420,15 +585,42 @@ const TechnicalFeasibilityForm: React.FC = () => {
                   label="Add Cross-Connect Option"
                   sx={{ mt: 2 }}
                 />
+                <FormControl>
+                <RadioGroup
+                  value={technicalData.endA.connectionModeNewInterface}
+                  onChange={(e) => handleConnectionModeChange('endA', e.target.value as 'VLAN' | 'PORT')}
+                  row
+                >
+                  <FormControlLabel
+                    value="VLAN"
+                    control={<Radio sx={{ color: 'orange', '&.Mui-checked': { color: 'orange' } }} />}
+                    label="VLAN Mode"
+                  />
+                  <FormControlLabel
+                    value="PORT"
+                    control={<Radio sx={{ color: 'orange', '&.Mui-checked': { color: 'orange' } }} />}
+                    label="Port Mode"
+                  />
+                </RadioGroup>
+              </FormControl>
+              {technicalData.endA.connectionModeNewInterface === 'VLAN' && (
+                <Box sx={{ mt: 2 }}>
+                  <InputLabel htmlFor="vlan-number-new-a">VLAN number</InputLabel>
+                  <TextField
+                    id="vlan-number-new-a"
+                    variant="outlined"
+                    value={technicalData.endA?.vlanNumberNewInterface}
+                    onChange={(e) => handleVlanNumberChange('endA', e.target.value)}
+                    size="small"
+                    sx={{ width: 200 }}
+                  />
+                  <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                    You can choose between 2 and 4094
+                  </Typography>
+                </Box>
+              )}
               </Box>
             </Box>
-            
-            {/* Bandwidth Information */}
-            <BandwidthBox>
-              <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                Bandwidth: 8 Mbps
-              </Typography>
-            </BandwidthBox>
           </EndpointSection>
         </Grid>
         
@@ -484,19 +676,19 @@ const TechnicalFeasibilityForm: React.FC = () => {
                 </Box>
               )}
               
-              {endBStatus === 'succeeded' && endBInterfaces.map((intf) => (
-                <Box key={intf.id} sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+              {endBStatus === 'succeeded' && (
+                <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
                   <Typography variant="body2" fontWeight='bold'>
-                    {intf.name || 'Interface ' + intf.id}
+                    {technicalData.endB.interface || 'N/A'}
                   </Typography>
                   <Typography variant="body2">
-                    Type: {intf.interface_type || 'Not specified'}
+                    {technicalData.endB.router || 'N/A'}
                   </Typography>
                   <Typography variant="body2">
-                    Availability: {intf.availability || 'Unknown'}
+                    {`${parseInt(technicalData.endB.bw_avail || '0') / 100}Gbps / ${parseInt(technicalData.endB.bw_max || '0') /100}Gbps`}
                   </Typography>
                 </Box>
-              ))}
+              )}
               
               {/* Fall back to static data if needed */}
               {endBStatus !== 'loading' && endBStatus !== 'succeeded' && (
@@ -574,13 +766,6 @@ const TechnicalFeasibilityForm: React.FC = () => {
                 />
               </Box>
             </Box>
-            
-            {/* Bandwidth Information */}
-            <BandwidthBox>
-              <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                Bandwidth: 4 Mbps
-              </Typography>
-            </BandwidthBox>
           </EndpointSection>
         </Grid>
       </Grid>

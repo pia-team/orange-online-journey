@@ -51,6 +51,7 @@ createRoot(document.getElementById('root')!).render(
         <img
           src={orangeLogo}
           alt="Orange Logo"
+          width="200px"
         />
       </div>} 
     >
